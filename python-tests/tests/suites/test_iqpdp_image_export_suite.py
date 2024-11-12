@@ -1,9 +1,9 @@
+# python-tests/tests/suites/test_iqpdp_image_export_suite.py
 import pytest
 import os
 import pandas as pd
-import requests
-from tests.base_test import setup_existing_profile_extensions_context, apply_cookies_and_navigate
-from src.pages.image_export_page import ImageExportPage
+from tests.base_test import setup_existing_profile_context, apply_cookies_and_navigate
+from src.pages.image_export_iqpdpage import ImageExportPage
 from src.cores.json_reader import JsonReader
 from src.cores.excel_writer import ExcelWriter
 
@@ -19,9 +19,9 @@ test_setup = config.get("testSetup", {})
 ] + [
     (test_setup["pcDevice"], url) for url in urls
 ])
-def test_image_export(device_config, url, setup_existing_profile_extensions_context):
+def test_iqpdp_image_export(device_config, url, setup_existing_profile_context):
     # Use the standard context fixture
-    context, logger, browser_manager = setup_existing_profile_extensions_context
+    context, logger, browser_manager = setup_existing_profile_context
 
     try:
         # Apply cookies and navigate to the URL with all cookies pre-set
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     pytest_args = [
         "-n", "2",  # Run tests in parallel on 2 CPUs
         "-s",  # Disable output capturing to see console logs
-        "python-tests/tests/suites/test_image_export_suite.py"
+        "python-tests/tests/suites/test_iqpdp_image_export_suite.py"
     ]
     pytest.main(pytest_args)

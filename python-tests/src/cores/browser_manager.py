@@ -15,7 +15,7 @@ class BrowserManager:
                 extension_paths.append(root)
         return extension_paths
 
-    def _setup_context(self, **context_args) -> BrowserContext:
+    def _setup_persistent_context(self, **context_args) -> BrowserContext:
         """Helper method to configure and launch a persistent browser context with specified arguments."""
         # Launch persistent context without any arguments; all args will be added individually
         browser = self.playwright.chromium.launch_persistent_context(**context_args)
@@ -36,6 +36,26 @@ class BrowserManager:
         browser.on("page", lambda page: self._handle_new_page(page, unwanted_tabs))
 
         return browser
+
+    def create_existing_profile_context(self, user_data_dir: str, viewport: dict, is_mobile: bool,
+                                                   has_touch: bool, user_agent: str) -> BrowserContext:
+        context_args = {
+            "user_data_dir": user_data_dir,
+            "channel": "chrome",
+            "headless": False,
+            "viewport": viewport,
+            "is_mobile": is_mobile,
+            "has_touch": has_touch,
+            "user_agent": user_agent,
+            "args": [
+                "--auto-open-devtools-for-tabs",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-default-apps"
+            ]
+        }
+
+        return self._setup_persistent_context(**context_args)
 
     def create_existing_profile_extensions_context(self, user_data_dir: str, viewport: dict, is_mobile: bool,
                                                    has_touch: bool, user_agent: str) -> BrowserContext:
@@ -64,7 +84,7 @@ class BrowserManager:
             ]
         }
 
-        return self._setup_context(**context_args)
+        return self._setup_persistent_context(**context_args)
 
     def create_existing_profile_extensions_context_har(self, har_file_path: str, user_data_dir: str, viewport: dict,
                                                        is_mobile: bool, has_touch: bool,
@@ -98,7 +118,7 @@ class BrowserManager:
             # "record_har_url_filter": r".*\.(png|jpg|jpeg|gif|bmp|webp|svg|mp4|webm)$"
         }
 
-        return self._setup_context(**context_args)
+        return self._setup_persistent_context(**context_args)
 
     def close_context(self, context: BrowserContext):
         """ Close the browser context to free resources """

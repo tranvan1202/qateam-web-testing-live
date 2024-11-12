@@ -68,6 +68,28 @@ def setup_existing_profile_extensions_context(device_config, request):
         browser_manager.close_context(context)
         logger.info("Browser context closed")
 
+@pytest.fixture(scope="function")
+def setup_existing_profile_context(device_config, request):
+    """Setup browser context with user profile and extensions, without HAR recording."""
+    user_data_dir, viewport, is_mobile, has_touch, user_agent = _get_device_config(device_config)
+    logger = _initialize_logger(request)
+
+    with sync_playwright() as playwright:
+        browser_manager = BrowserManager(playwright)
+        context = browser_manager.create_existing_profile_context(
+            user_data_dir=user_data_dir,
+            viewport=viewport,
+            is_mobile=is_mobile,
+            has_touch=has_touch,
+            user_agent=user_agent
+        )
+
+        yield context, logger, browser_manager
+
+        # Teardown: close context
+        logger.info("Closing browser context")
+        browser_manager.close_context(context)
+        logger.info("Browser context closed")
 
 @pytest.fixture(scope="function")
 def setup_existing_profile_extensions_context_har(device_config, request):

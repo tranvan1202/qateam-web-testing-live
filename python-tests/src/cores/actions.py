@@ -26,19 +26,25 @@ class Actions:
         with open(locators_path, 'r') as locators_file:
             return json.load(locators_file)
 
-    def click_element(self, selector: str, force: bool = False):
-        element = self.page.locator(selector)
-        if element.is_visible():
-            element.click(force=force)
-
-    def click_declared_elements(self):
+    def click_js_declared_elements(self, jsonValues):
         # Click all elements with class names declared in locators.json
-        class_names = self.locators.get("lazyloadTriggerElementClassNames", [])
+        class_names = self.locators.get(jsonValues, [])
+        # Click all elements with class names declared
         for class_name in class_names:
             elements = self.page.locator(f".{class_name}")
             for element in elements.all():
                 if element.is_visible():
                     element.click(force=True)
+
+    def doubleclick_js_declared_elements(self, jsonValues):
+        # Click all elements with class names declared in locators.json
+        class_names = self.locators.get(jsonValues, [])
+        # Click all elements with class names declared
+        for class_name in class_names:
+            elements = self.page.locator(f".{class_name}")
+            for element in elements.all():
+                if element.is_visible():
+                    element.dblclick(force=True)
 
     def scroll_to_bottom(self, step: int = 300, wait_time: float = 0.2):
         page_height = self.page.evaluate("() => document.body.scrollHeight")
