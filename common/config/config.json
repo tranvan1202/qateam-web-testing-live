@@ -1,7 +1,7 @@
 {
   "urlList": [
-    "https://www.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html",
-    "https://www.stg.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html?gr=false"
+    "https://www.zingnews.vn",
+    "https://www.samsung.com/th"
     ],
   "testSetup": {
     "moDevice": {
@@ -14,8 +14,8 @@
       "button_waitTime": 1000
     },
     "pcDevice": {
-      "viewport_width": 1024,
-      "viewport_height": 768,
+      "viewport_width": 1440,
+      "viewport_height": 900,
       "profileChromePath_PC": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Profile 4",
       "is_mobile": false,
       "has_touch": false,

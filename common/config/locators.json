@@ -4,10 +4,13 @@
     "passwordField": "#password",
     "loginButton": ".login-button"
   },
-  "lazyloadTriggerElementClassNames": [
+  "ssLazyLoadTriggerElementClassNames": [
     "carousel",
     "indicator__item",
     "scrollbar-horizontal__bar",
     "indicator__dot"
+  ],
+  "iqLazyLoadTriggerElementClassNames": [
+    "img-fluid swiper-lazy swiper-lazy-loaded"
   ]
 }
