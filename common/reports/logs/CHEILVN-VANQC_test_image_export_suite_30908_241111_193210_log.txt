@@ -1,0 +1,5 @@
+2024-11-11 19:32:10,321 - test_image_export_suite_30908 - INFO - Log file saved to: D:\Auto\Project\qateam-web-testing\common\reports\logs\CHEILVN-VANQC_test_image_export_suite_30908_241111_193210_log.txt
+2024-11-11 19:32:23,493 - test_image_export_suite_30908 - INFO - Navigating to URL with all cookies pre-set: https://www.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html
+2024-11-11 19:32:53,921 - test_image_export_suite_30908 - INFO - Initializing ImageExportPage to extract image data and export to Excel
+2024-11-11 19:37:51,032 - test_image_export_suite_30908 - INFO - Closing browser context
+2024-11-11 19:37:51,051 - test_image_export_suite_30908 - INFO - Browser context closed

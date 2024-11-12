@@ -1,0 +1,52 @@
+{
+  "urlList": [
+    "https://www.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html",
+    "https://www.stg.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html?gr=false"
+    ],
+  "testSetup": {
+    "moDevice": {
+      "viewport_width": 360,
+      "viewport_height": 780,
+      "profileChromePath_MO": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Profile 9",
+      "is_mobile": true,
+      "has_touch": true,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Mobile/15E148 Safari/604.1",
+      "button_waitTime": 1000
+    },
+    "pcDevice": {
+      "viewport_width": 1024,
+      "viewport_height": 768,
+      "profileChromePath_PC": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Profile 4",
+      "is_mobile": false,
+      "has_touch": false,
+      "user_agent": null,
+      "button_waitTime": 1500
+    }
+  },
+  "paths": {
+    "extensionsPath": "./common/extensions"
+  },
+  "ignoredElements": {
+    "imgDomains": [
+      "adsrvr.org", "doubleclick.net",
+      "facebook.com", "yahoo.com",
+      "criteo.com", "demdex.net",
+      "google.com","adobe.com","log.api.useinsider.com"
+    ],
+    "hrefLinks": [
+      "javascript:void(0)", "javascript:;", "mailto:"
+    ]
+  },
+  "authorizeTokens": {
+    "pp": {
+      "iqos": [""],
+      "zyn": [""],
+      "veev-vape": [""]
+    },
+    "stg": {
+      "iqos": [""],
+      "zyn": [""],
+      "veev-vape": [""]
+    }
+  }
+}

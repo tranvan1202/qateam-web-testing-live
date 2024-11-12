@@ -1,0 +1,56 @@
+qateam-web-testing/
+|-- common/                               # Shared resources for all languages
+|   |-- config/                           # Configuration files (e.g., config.json)
+|   |   |-- locators.json                 # Locator definitions for all page elements
+|   |   |-- config.json                   # General configuration (e.g., URLs, paths, extensions)
+|   |-- report/                           # Reports generated from tests
+|   |   |-- logs/                         # Log files generated during test execution
+|   |-- tools/                            # Common tools used across multiple test languages (e.g., scripts)
+|
+|-- src/                                  # Source code for reusable libraries or application modules (if applicable)
+|
+|-- python-tests/                         # Python-specific test automation project
+|   |-- src/                               # Source folder for reusable testing components
+|   |   |-- pages/                         # Page Object Model (POM) classes representing application pages
+|   |   |   |-- base_page.py               # BasePage class with shared functionalities for all page classes
+|   |   |   |-- login_page.py              # LoginPage class with functionalities specific to the login page
+|   |   |   |-- __init__.py                # Init file to treat pages directory as a package
+|   |   |-- core/                          # Core utilities and reusable modules
+|   |   |   |-- actions.py                 # Common actions reusable across multiple pages
+|   |   |   |-- logger.py                  # Custom logger for writing logs
+|   |   |   |-- json_reader.py             # Helper module for reading JSON configuration files
+|   |   |   |-- browser_manager.py         # Browser setup and context management for Playwright, including loading extensions
+|   |   |   |-- locators.py                # Locator utility for reading locators from locators.json
+|   |   |   |-- __init__.py                # Init file to treat core utilities as a package
+|   |   |-- __init__.py                    # Init file to treat src directory as a package
+|   |-- tests/                             # Test scripts for different scenarios
+|   |   |-- suites/                        # Test suites grouping related test scripts
+|   |   |   |-- authentication_suite.py    # Test suite for authentication scenarios
+|   |   |   |-- checkout_suite.py          # Test suite for checkout scenarios
+|   |   |   |-- __init__.py                # Init file to treat suites directory as a package
+|   |   |-- scripts/                       # Individual test scripts for specific functionalities
+|   |   |   |-- login_test.py              # Test script for login functionality
+|   |   |   |-- add_to_cart_test.py        # Test script for adding items to the cart
+|   |   |   |-- __init__.py                # Init file to treat scripts directory as a package
+|   |   |-- __init__.py                    # Init file to treat tests directory as a package
+|   |-- console_menu.py                    # Console Menu to choose and run test scenarios for Python
+|   |-- requirements.txt                   # Python libraries required for automation tests
+|   |-- README.md                          # Documentation for Python-specific automation tests
+|
+|-- java-tests/                           # Java-specific test automation project
+|   |-- src/                               # Java source components
+|   |-- tests/                             # Java test scripts and suites
+|   |   |-- suites/                        # Java test suites grouping related tests
+|   |   |-- scripts/                       # Java test scripts for individual functionalities
+|   |-- console_menu.java                  # Console Menu to choose test scenarios for Java automation
+|   |-- README.md                          # Documentation for Java-specific automation tests
+|
+|-- js-tests/                             # JavaScript-specific test automation project
+|   |-- src/                               # JavaScript source components
+|   |-- tests/                             # JavaScript test scripts and suites
+|   |   |-- suites/                        # JavaScript test suites grouping related tests
+|   |   |-- scripts/                       # JavaScript test scripts for individual functionalities
+|   |-- console_menu.js                    # Console Menu to choose test scenarios for JavaScript automation
+|   |-- README.md                          # Documentation for JavaScript-specific automation tests
+|
+|-- README.md                              # General project documentation

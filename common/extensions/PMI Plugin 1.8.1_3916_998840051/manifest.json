@@ -1,0 +1,151 @@
+{
+  "name": "Cheil PMI Shortcuts",
+  "version": "1.8.1",
+  "description": "Extension for Cheil PMI AEM shortcuts",
+  "author": "Maciej Wodzyński",
+  "manifest_version": 3,
+  "permissions": ["activeTab", "storage", "scripting", "alarms"],
+  "host_permissions": [
+    "https://www.pp.iqos.com/*",
+    "https://www.stg.iqos.com/*",
+    "https://www.iqos.com/*",
+    "https://author.pp.iqos.com/content/*",
+    "https://author.stg.iqos.com/content/*",
+    "https://author.iqos.com/content/*",
+    "https://www.pp.veev-vape.com/*",
+    "https://www.stg.veev-vape.com/*",
+    "https://www.veev-vape.com/*",
+    "https://www.pp.zyn.com/*",
+    "https://www.stg.zyn.com/*",
+    "https://www.zyn.com/*",
+    "https://www.pp.iqosclub.com/*",
+    "https://www.stg.iqosclub.com/*",
+    "https://www.iqosclub.com/*",
+    "https://club.pp.iqos.com/*",
+    "https://club.stg.iqos.com/*",
+    "https://www.iqosplus.com/*",
+    "https://plus.pp.iqos.com/*",
+    "https://plus.stg.iqos.com/*",
+    "https://www.origin.pp.iqos.com/*",
+    "https://www.dev.iqos.com/*",
+    "https://www.qa.iqos.com/*",
+    "https://author.dev.iqos.com/content/*",
+    "https://author.qa.iqos.com/content/*",
+    "https://www.origin.pp.veev-vape.com/*",
+    "https://www.dev.veev-vape.com/*",
+    "https://www.qa.veev-vape.com/*",
+    "https://www.origin.pp.zyn.com/*",
+    "https://www.dev.zyn.com/*",
+    "https://www.qa.zyn.com/*",
+    "https://club.origin.pp.iqos.com/*",
+    "https://club.dev.iqos.com/*",
+    "https://club.qa.iqos.com/*",
+    "https://plus.origin.pp.iqos.com/*",
+    "https://plus.dev.iqos.com/*",
+    "https://plus.qa.iqos.com/*",
+    "https://web.archive.org/*/www.iqos.com/*",
+    "https://web.archive.org/*/www.veev-vape.com/*",
+    "https://web.archive.org/*/www.zyn.com/*",
+    "https://web.archive.org/*/www.iqosclub.com/*",
+    "https://web.archive.org/*/www.iqosplus.com/*",
+    "http://web.archive.org/*/www.iqos.com/*",
+    "http://web.archive.org/*/www.veev-vape.com/*",
+    "http://web.archive.org/*/www.zyn.com/*",
+    "http://web.archive.org/*/www.iqosclub.com/*",
+    "http://web.archive.org/*/www.iqosplus.com/*"
+    ],
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.iqos.com/*",
+        "https://www.stg.iqos.com/*",
+        "https://www.pp.iqos.com/*",
+        "https://author.pp.iqos.com/content/*",
+        "https://author.stg.iqos.com/content/*",
+        "https://author.iqos.com/content/*",
+        "https://www.veev-vape.com/*",
+        "https://www.pp.veev-vape.com/*",
+        "https://www.stg.veev-vape.com/*",
+        "https://www.pp.zyn.com/*",
+        "https://www.stg.zyn.com/*",
+        "https://www.zyn.com/*",
+        "https://www.iqosclub.com/*",
+        "https://www.stg.iqosclub.com/*",
+        "https://www.pp.iqosclub.com/*",
+        "https://club.stg.iqos.com/*",
+        "https://club.pp.iqos.com/*",
+        "https://www.iqosplus.com/*",
+        "https://plus.stg.iqos.com/*",
+        "https://plus.pp.iqos.com/*",
+        "https://www.origin.pp.iqos.com/*",
+        "https://www.dev.iqos.com/*",
+        "https://www.qa.iqos.com/*",
+        "https://author.dev.iqos.com/content/*",
+        "https://author.qa.iqos.com/content/*",
+        "https://www.origin.pp.veev-vape.com/*",
+        "https://www.dev.veev-vape.com/*",
+        "https://www.qa.veev-vape.com/*",
+        "https://www.origin.pp.zyn.com/*",
+        "https://www.dev.zyn.com/*",
+        "https://www.qa.zyn.com/*",
+        "https://club.origin.pp.iqos.com/*",
+        "https://club.dev.iqos.com/*",
+        "https://club.qa.iqos.com/*",
+        "https://plus.origin.pp.iqos.com/*",
+        "https://plus.dev.iqos.com/*",
+        "https://plus.qa.iqos.com/*",
+        "https://web.archive.org/*/www.iqos.com/*",
+        "https://web.archive.org/*/www.veev-vape.com/*",
+        "https://web.archive.org/*/www.zyn.com/*",
+        "https://web.archive.org/*/www.iqosclub.com/*",
+        "https://web.archive.org/*/www.iqosplus.com/*",
+        "http://web.archive.org/*/www.iqos.com/*",
+        "http://web.archive.org/*/www.veev-vape.com/*",
+        "http://web.archive.org/*/www.zyn.com/*",
+        "http://web.archive.org/*/www.iqosclub.com/*",
+        "http://web.archive.org/*/www.iqosplus.com/*"
+      ],
+      "js": ["crawler.js"]
+    },
+    {
+      "matches": [
+        "https://www.pp.iqos.com/cgi-bin/authorize.cgi*",
+        "https://www.stg.iqos.com/cgi-bin/authorize.cgi*",
+        "https://www.pp.veev-vape.com/edgeauth*",
+        "https://www.stg.veev-vape.com/cgi-bin/authorize.cgi*",
+        "https://www.pp.zyn.com/edgeauth*",
+        "https://www.stg.zyn.com/cgi-bin/authorize.cgi*"
+      ],
+      "js": ["authorize.js"]
+    },
+    {
+      "matches": [
+        "https://pmicit.service-now.com.mcas.ms/*",
+        "https://pmicit.service-now.com/*"
+      ],
+      "js": ["qb/qbextension.js"],
+      "css": ["qb/qbextension.css"]
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/get_started16.png",
+      "32": "images/get_started32.png",
+      "48": "images/get_started48.png",
+      "128": "images/get_started128.png"
+    }
+  },
+  "icons": {
+    "16": "images/get_started16.png",
+    "32": "images/get_started32.png",
+    "48": "images/get_started48.png",
+    "128": "images/get_started128.png"
+  }
+}

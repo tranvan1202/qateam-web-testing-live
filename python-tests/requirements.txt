@@ -1,0 +1,9 @@
+playwright
+logging
+pytest
+pydantic
+pytest-xdist        # For running tests in parallel
+pytest-playwright   # For integrating Playwright with pytest
+pandas
+openpyxl
+XlsxWriter

@@ -1,0 +1,13 @@
+{
+  "loginPage": {
+    "usernameField": "#username",
+    "passwordField": "#password",
+    "loginButton": ".login-button"
+  },
+  "lazyloadTriggerElementClassNames": [
+    "carousel",
+    "indicator__item",
+    "scrollbar-horizontal__bar",
+    "indicator__dot"
+  ]
+}
