@@ -3,7 +3,7 @@
 import pytest
 import os
 from tests.base_test import setup_existing_profile_extensions_context, apply_cookies_and_navigate
-from src.pages.base_page import BasePage
+from src.pages.manual_check_page import ManualCheckPage
 from src.cores.json_reader import JsonReader
 
 # Adjust the relative path to locate the config file correctly
@@ -27,8 +27,8 @@ def test_page_access_with_manual_check(device_config, url, setup_existing_profil
 
     # Initialize BasePage to perform page-specific actions after navigation
     logger.info("Initializing BasePage to perform common actions")
-    base_page = BasePage(page, device="mo" if device_config["is_mobile"] else "pc")
-    base_page.perform_common_actions()
+    manual_check_page = ManualCheckPage(page, device="mo" if device_config["is_mobile"] else "pc")
+    manual_check_page.perform_common_actions()
     logger.info(f"Completed actions for {url} on {'mobile' if device_config['is_mobile'] else 'desktop'}")
 
     # Example assertion to verify successful navigation

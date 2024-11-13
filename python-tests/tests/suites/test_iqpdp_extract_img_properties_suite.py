@@ -1,9 +1,10 @@
-# python-tests/tests/suites/test_iqpdp_image_export_suite.py
+# python-tests/tests/suites/test_iqpdp_extract_img_properties_suite.py
+
 import pytest
 import os
 import pandas as pd
 from tests.base_test import setup_existing_profile_context, apply_cookies_and_navigate
-from src.pages.image_export_iqpdpage import ImageExportPage
+from src.pages.iq_pdpage import IQPDPage  # Updated to use IQPDPage instead of ImageExportPage
 from src.cores.json_reader import JsonReader
 from src.cores.excel_writer import ExcelWriter
 
@@ -19,7 +20,7 @@ test_setup = config.get("testSetup", {})
 ] + [
     (test_setup["pcDevice"], url) for url in urls
 ])
-def test_iqpdp_image_export(device_config, url, setup_existing_profile_context):
+def test_iqpdp_extract_img_properties(device_config, url, setup_existing_profile_context):
     # Use the standard context fixture
     context, logger, browser_manager = setup_existing_profile_context
 
@@ -27,13 +28,12 @@ def test_iqpdp_image_export(device_config, url, setup_existing_profile_context):
         # Apply cookies and navigate to the URL with all cookies pre-set
         page = apply_cookies_and_navigate(context, logger, url)
 
-        # Initialize ImageExportPage for data extraction and export
-        logger.info("Initializing ImageExportPage to extract image data and export to Excel")
-        image_export_page = ImageExportPage(page, device="mo" if device_config["is_mobile"] else "pc")
-        image_export_page.perform_common_actions()
+        # Initialize IQPDPage for data extraction
+        logger.info("Initializing IQPDPage to extract image data and export to Excel")
+        iqpd_page = IQPDPage(page, device="mo" if device_config["is_mobile"] else "pc")
 
-        # Gather all <img> element data from the DOM
-        img_data = image_export_page.get_image_data_from_dom()
+        # Gather image data only when needed
+        img_data = iqpd_page.get_image_data()
 
         # Data validation: Proceed if data is valid; otherwise, skip export
         if not img_data or len(img_data) <= 1:
@@ -43,7 +43,7 @@ def test_iqpdp_image_export(device_config, url, setup_existing_profile_context):
         excel_writer = ExcelWriter()
         filename = excel_writer.write_data_to_excel(
             img_data,
-            executed_file_name="test_image_export_suite",
+            executed_file_name="test_iqpdp_extract_img_properties_suite",
             device_type="mobile" if device_config["is_mobile"] else "desktop"
         )
 
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     pytest_args = [
         "-n", "2",  # Run tests in parallel on 2 CPUs
         "-s",  # Disable output capturing to see console logs
-        "python-tests/tests/suites/test_iqpdp_image_export_suite.py"
+        "python-tests/tests/suites/test_iqpdp_extract_img_properties_suite.py"
     ]
     pytest.main(pytest_args)

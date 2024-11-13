@@ -3,6 +3,9 @@
 import time
 import json
 import os
+import logging
+from urllib.parse import urlparse
+
 from playwright.sync_api import Page
 
 class Actions:
@@ -13,38 +16,55 @@ class Actions:
         self.locators = self._load_locators()
 
     def _load_config(self):
-        # Load configuration from config.json
-        config_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'common', 'config', 'config.json'))
-        with open(config_path, 'r') as config_file:
-            return json.load(config_file)
+        # Load configuration from config.json with error handling
+        try:
+            config_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..', '..', 'common', 'config', 'config.json'))
+            with open(config_path, 'r') as config_file:
+                return json.load(config_file)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logging.error(f"Failed to load config.json: {e}")
+            return {}
 
     def _load_locators(self):
-        # Load locators from locators.json
-        locators_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'common', 'config', 'locators.json'))
-        with open(locators_path, 'r') as locators_file:
-            return json.load(locators_file)
+        # Load locators from locators.json with error handling
+        try:
+            locators_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..', '..', 'common', 'config', 'locators.json'))
+            with open(locators_path, 'r') as locators_file:
+                return json.load(locators_file)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logging.error(f"Failed to load locators.json: {e}")
+            return {}
 
-    def click_js_declared_elements(self, jsonValues):
-        # Click all elements with class names declared in locators.json
+    from urllib.parse import urlparse
+
+    def click_js_declared_elements(self, jsonValues, force_click=True):
+        # Get the list of class names from locators.json
         class_names = self.locators.get(jsonValues, [])
-        # Click all elements with class names declared
+
         for class_name in class_names:
             elements = self.page.locator(f".{class_name}")
-            for element in elements.all():
-                if element.is_visible():
-                    element.click(force=True)
 
-    def doubleclick_js_declared_elements(self, jsonValues):
-        # Click all elements with class names declared in locators.json
-        class_names = self.locators.get(jsonValues, [])
-        # Click all elements with class names declared
-        for class_name in class_names:
-            elements = self.page.locator(f".{class_name}")
             for element in elements.all():
+                # Check if the element is visible
                 if element.is_visible():
-                    element.dblclick(force=True)
+                    # Check if the element has a href attribute
+                    href = element.get_attribute("href")
+
+                    if href:
+                        # Parse the href to check for navigation paths or URLs
+                        parsed_href = urlparse(href)
+
+                        # Determine if it's a navigation link by checking for scheme, netloc, or path
+                        if parsed_href.scheme or parsed_href.netloc or parsed_href.path:
+                            logging.info(
+                                f"Skipping click on navigational element with href '{href}' to prevent redirection.")
+                            continue  # Skip if href contains a URL or relative path
+
+                    # Otherwise, proceed to click the element
+                    logging.info(f"Clicking on element with class {class_name}")
+                    element.click(force=force_click)
 
     def scroll_to_bottom(self, step: int = 300, wait_time: float = 0.2):
         page_height = self.page.evaluate("() => document.body.scrollHeight")
@@ -53,12 +73,16 @@ class Actions:
             scroll_position += step
             self.page.evaluate(f"window.scrollTo(0, {scroll_position})")
             time.sleep(wait_time)
-            page_height = self.page.evaluate("() => document.body.scrollHeight")
+            # Update page height only if lazy-loaded content is expected
+            if self.page.evaluate("() => document.body.scrollHeight") > page_height:
+                page_height = self.page.evaluate("() => document.body.scrollHeight")
 
     def scroll_to_top(self):
+        logging.info("Scrolling to the top of the page")
         self.page.evaluate("window.scrollTo(0, 0)")
 
     def inject_button_script(self, wait_time: int):
+        logging.info("Injecting button script with countdown timer")
         button_script = f"""
         (function() {{
           var button = document.createElement('button');
@@ -97,6 +121,7 @@ class Actions:
     def wait_for_button_trigger_or_timeout(self, device: str):
         # Use the concise wait time value from configuration based on the device type
         wait_time = self.get_wait_time(device)
+        logging.info(f"Waiting for button trigger or timeout of {wait_time} seconds")
         start_time = time.time()
         while (time.time() - start_time) < wait_time:
             next_step_triggered = self.page.evaluate("() => window.nextStepTriggered || false")

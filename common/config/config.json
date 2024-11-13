@@ -1,8 +1,8 @@
 {
   "urlList": [
     "https://www.zingnews.vn",
-    "https://www.samsung.com/th"
-    ],
+    "https://www.samsung.com/ph/offer/fold6-flip6/"
+  ],
   "testSetup": {
     "moDevice": {
       "viewport_width": 360,

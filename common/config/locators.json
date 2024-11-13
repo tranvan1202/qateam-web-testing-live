@@ -5,10 +5,7 @@
     "loginButton": ".login-button"
   },
   "ssLazyLoadTriggerElementClassNames": [
-    "carousel",
-    "indicator__item",
-    "scrollbar-horizontal__bar",
-    "indicator__dot"
+    "indicator__item","tab-container__item","tab__item","kv-tab-container__tab-title"
   ],
   "iqLazyLoadTriggerElementClassNames": [
     "img-fluid swiper-lazy swiper-lazy-loaded"
