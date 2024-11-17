@@ -3,7 +3,7 @@
 import pytest
 import os
 import pandas as pd
-from tests.base_test import setup_existing_profile_context, apply_cookies_and_navigate
+from tests.base_test_bk import setup_existing_profile_without_extensions_context, apply_cookies_and_navigate
 from src.pages.iq_pdpage import IQPDPage  # Updated to use IQPDPage instead of ImageExportPage
 from src.cores.json_reader import JsonReader
 from src.cores.excel_writer import ExcelWriter
@@ -20,9 +20,9 @@ test_setup = config.get("testSetup", {})
 ] + [
     (test_setup["pcDevice"], url) for url in urls
 ])
-def test_iqpdp_extract_img_properties(device_config, url, setup_existing_profile_context):
+def test_iqpdp_extract_img_properties(device_config, url, setup_existing_profile_without_extensions_context):
     # Use the standard context fixture
-    context, logger, browser_manager = setup_existing_profile_context
+    context, logger, browser_manager = setup_existing_profile_without_extensions_context
 
     try:
         # Apply cookies and navigate to the URL with all cookies pre-set

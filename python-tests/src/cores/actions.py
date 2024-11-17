@@ -88,7 +88,7 @@ class Actions:
           var button = document.createElement('button');
           button.id = 'nextStepButton';
           button.style.position = 'fixed';
-          button.style.top = '20px';
+          button.style.top = '100px';
           button.style.left = '20px';
           button.style.zIndex = '10000';
           button.style.padding = '15px';

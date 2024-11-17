@@ -2,7 +2,7 @@
 
 import pytest
 import os
-from tests.base_test import setup_existing_profile_extensions_context, apply_cookies_and_navigate
+from tests.base_test_bk import setup_existing_profile_with_extensions_context, apply_cookies_and_navigate
 from src.pages.manual_check_page import ManualCheckPage
 from src.cores.json_reader import JsonReader
 
@@ -18,9 +18,9 @@ test_setup = config.get("testSetup", {})
 ] + [
     (test_setup["pcDevice"], url) for url in urls
 ])
-def test_page_access_with_manual_check(device_config, url, setup_existing_profile_extensions_context):
+def test_page_access_with_manual_check(device_config, url, setup_existing_profile_with_extensions_context):
     # Use the fixture-provided context, logger, and browser manager
-    context, logger, browser_manager = setup_existing_profile_extensions_context
+    context, logger, browser_manager = setup_existing_profile_with_extensions_context
 
     # Apply cookies and navigate to the URL with all cookies pre-set
     page = apply_cookies_and_navigate(context, logger, url)
