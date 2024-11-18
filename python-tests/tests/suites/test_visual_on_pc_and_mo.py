@@ -5,8 +5,8 @@ from src.pages.manual_check_page import ManualCheckPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html?gr=false",
-    "https://www.samsung.com/my/business/washers-and-dryers/washing-machines/wa5000c-top-load-ecobubble-digital-inverter-technology-super-speed-wa13cg5745bvfq/"
+    "https://www.samsung.com/my/business/washers-and-dryers/washing-machines/wa5000c-top-load-ecobubble-digital-inverter-technology-super-speed-wa13cg5745bvfq/",
+    "https://www.samsung.com/my/watches/galaxy-watch/galaxy-watch-ultra-titanium-gray-lte-sm-l705fdaaxme/buy/"
 ]
 
 @pytest.mark.parametrize(
@@ -15,41 +15,34 @@ URLS_TO_TEST = [
     ids=["device_pc", "device_mo"]
 )
 def test_access_correct_url(browser_factory_fixture, analyze_url_and_apply_cookie, device_type):
-    """Test page accessibility with optional cookie management."""
+    """Test page accessibility with multiple tabs and common actions."""
+    max_tabs = 10  # If >1, treat as multiple tabs
     failed_urls = []
-    context = None  # Initialize context to ensure proper cleanup in case of an error
+    context = None
 
     try:
         print("Creating browser context...")
         context = browser_factory_fixture(
             device_type=device_type,
-            persistent=False,
+            persistent=True,
             headless=False,
-            extensions=False
+            extensions=True
         )
         print("Browser context created.")
 
-        # Use the initial blank tab created by the browser context
+        # Initialize ManualCheckPage
         page = context.pages[0] if context.pages else context.new_page()
+        manual_check_page = ManualCheckPage(page, device=device_type)
 
+        # Apply cookies for all URLs
         for url in URLS_TO_TEST:
-            try:
-                print(f"Processing URL: {url}")
-                # Apply cookies if available
-                analyze_url_and_apply_cookie(context, url)
+            analyze_url_and_apply_cookie(context, url)
 
-                # Use the existing page to navigate to the URL
-                manual_check_page = ManualCheckPage(page, device=device_type)
-                manual_check_page.navigate(url)
-                manual_check_page.perform_common_actions()
-
-                assert manual_check_page.is_url_loaded(url), f"Expected URL: {url}, but got {page.url}"
-
-                print(f"Successfully validated URL: {url}")
-
-            except AssertionError as e:
-                print(f"Test failed for URL: {url}")
-                failed_urls.append(f"URL: {url}, Error: {e}")
+        # Perform navigation and actions
+        failed_urls = manual_check_page.navigate_and_perform_actions(
+            urls=URLS_TO_TEST,
+            max_tabs=max_tabs
+        )
 
     finally:
         if context:
@@ -58,7 +51,6 @@ def test_access_correct_url(browser_factory_fixture, analyze_url_and_apply_cooki
 
     if failed_urls:
         pytest.fail("\n".join(failed_urls))
-
 
 # Run tests in parallel with console logging when the script is executed directly
 if __name__ == "__main__":

@@ -3,34 +3,25 @@
 from src.pages.base_page import BasePage
 
 class ManualCheckPage(BasePage):
-    """
-    Page Object for manual checks. Provides reusable methods to interact with the page.
-    """
-    def navigate(self, url):
-        """
-        Navigate to the given URL using the existing default tab if available.
-        :param url: The URL to navigate to.
-        """
-        self.page.goto(url, timeout=60000)
+    def get_loaded_url(self):
+        """Retrieve the current URL of the page."""
+        return self.page.url
 
-    def is_url_loaded(self, expected_url):
+    def is_url_loaded(self, expected_url, page=None):
         """
-        Verify if the current URL matches the expected URL.
+        Check if the current page URL matches the expected URL.
         :param expected_url: The expected URL to validate.
-        :return: True if the URLs match, False otherwise.
+        :param page: Optional specific page object (defaults to self.page).
+        :return: True if the URL matches, otherwise False.
         """
-        return self.page.url == expected_url
+        page = page or self.page  # Use the provided page or fall back to self.page
+        return page.url == expected_url
 
-    def is_body_visible(self):
+    def is_body_visible(self, page=None):
         """
-        Check if the body element is visible.
-        :return: True if the body element is visible, False otherwise.
+        Check if the body element is visible on the page.
+        :param page: Optional specific page object (defaults to self.page).
+        :return: True if the body is visible, otherwise False.
         """
-        return self.page.locator("body").is_visible()
-
-    def get_cookies(self):
-        """
-        Retrieve cookies for the current page.
-        :return: List of cookies.
-        """
-        return self.page.context.cookies()
+        page = page or self.page
+        return page.is_visible("body")
