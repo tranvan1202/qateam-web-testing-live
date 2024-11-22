@@ -1,5 +1,3 @@
-# python-tests/tests/conftest.py
-
 import pytest
 from fixtures.browser import browser_factory
 from src.cores.json_reader import JsonReader
@@ -24,12 +22,26 @@ def playwright_instance():
 @pytest.fixture(scope="function")
 def browser_factory_fixture(playwright_instance, config):
     """
-    Provide a browser factory for dynamic context creation.
+    Provide a browser context for dynamic test setup and teardown.
     :param playwright_instance: An active Playwright instance.
     :param config: Global test configuration.
-    :return: A factory function for creating browser contexts.
+    :return: A browser context ready for use in tests.
     """
-    return lambda **kwargs: browser_factory(playwright_instance, config, **kwargs)
+    context = None  # Initialize context
+
+    def create_browser_context(**kwargs):
+        """Create a browser context with specified parameters."""
+        nonlocal context
+        context = browser_factory(playwright_instance, config, **kwargs)
+        return context
+
+    yield create_browser_context  # Provide the factory function to the test
+
+    # Teardown: Ensure the context is closed after the test
+    if context:
+        print("Closing browser context...")
+        context.close()
+        print("Browser context closed.")
 
 
 @pytest.fixture(scope="function")

@@ -1,13 +1,14 @@
-# python-tests/tests/suites/test_visual_on_pc_and_mo.py
-
 import pytest
 from src.pages.manual_check_page import ManualCheckPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.samsung.com/my/business/washers-and-dryers/washing-machines/wa5000c-top-load-ecobubble-digital-inverter-technology-super-speed-wa13cg5745bvfq/",
-    "https://www.samsung.com/my/watches/galaxy-watch/galaxy-watch-ultra-titanium-gray-lte-sm-l705fdaaxme/buy/"
+    "https://www.samsung.com/vn/",
+    "https://www.samsung.com/sg/offer/",
+    "https://www.samsung.com/th/",
 ]
+max_tabs = 10  # If >1, treat as multiple tabs
+validate_urls = True  # Decide whether to validate navigated URLs
 
 @pytest.mark.parametrize(
     "device_type",
@@ -16,41 +17,40 @@ URLS_TO_TEST = [
 )
 def test_access_correct_url(browser_factory_fixture, analyze_url_and_apply_cookie, device_type):
     """Test page accessibility with multiple tabs and common actions."""
-    max_tabs = 10  # If >1, treat as multiple tabs
-    failed_urls = []
-    context = None
+    validation_errors = []  # To collect all validation errors
 
-    try:
-        print("Creating browser context...")
-        context = browser_factory_fixture(
-            device_type=device_type,
-            persistent=True,
-            headless=False,
-            extensions=True
-        )
-        print("Browser context created.")
+    print("Creating browser context...")
+    context = browser_factory_fixture(
+        device_type=device_type,
+        persistent=True,
+        headless=False,
+        extensions=True
+    )
+    print("Browser context created.")
 
-        # Initialize ManualCheckPage
-        page = context.pages[0] if context.pages else context.new_page()
-        manual_check_page = ManualCheckPage(page, device=device_type)
+    # Initialize ManualCheckPage
+    page = context.pages[0] if context.pages else context.new_page()
+    manual_check_page = ManualCheckPage(page, device=device_type)
 
-        # Apply cookies for all URLs
-        for url in URLS_TO_TEST:
-            analyze_url_and_apply_cookie(context, url)
+    # Apply cookies for all URLs
+    for url in URLS_TO_TEST:
+        analyze_url_and_apply_cookie(context, url)
 
-        # Perform navigation and actions
-        failed_urls = manual_check_page.navigate_and_perform_actions(
-            urls=URLS_TO_TEST,
-            max_tabs=max_tabs
-        )
+    # Perform navigation and actions
+    tab_results = manual_check_page.navigate_and_perform_actions(
+        urls=URLS_TO_TEST,
+        max_tabs=max_tabs,
+        collect_results=validate_urls
+    )
 
-    finally:
-        if context:
-            context.close()
-            print("Browser context closed.")
-
-    if failed_urls:
-        pytest.fail("\n".join(failed_urls))
+    # Validate navigated URLs if validation is enabled
+    if validate_urls:
+        for tab_index, expected_url, actual_url in tab_results:
+            pytest.assume(
+                actual_url == expected_url,
+                f"Tab {tab_index}: Expected URL {expected_url}, but got {actual_url}"
+            )
+        pytest.fail("\n".join(validation_errors))
 
 # Run tests in parallel with console logging when the script is executed directly
 if __name__ == "__main__":

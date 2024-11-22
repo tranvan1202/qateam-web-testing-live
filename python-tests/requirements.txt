@@ -7,3 +7,4 @@ pytest-playwright   # For integrating Playwright with pytest
 pandas
 openpyxl
 XlsxWriter
+pytest-assume
