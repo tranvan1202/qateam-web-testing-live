@@ -1,0 +1,72 @@
+{
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "manifest_version": 3,
+  "name": "SelectorsHub - XPath Helper",
+  "description": "__MSG_extDescription__",
+  "author": "Sanjay Kumar",
+  "homepage_url": "https://www.selectorshub.com/",
+  "default_locale": "en",
+  "version": "5.3.5",
+
+  "devtools_page": "devtools-panel/devtools.html",
+
+  "icons": {
+    "128": "logo-128.png",
+    "48": "logo-48.png",
+    "96": "logo-96.png"
+  },
+
+  "action": {
+    "default_title": "__MSG_extDefaultTitle__",
+    "default_popup": "extension/popup.html"
+  },
+
+  "background": {
+    "service_worker": "extension/background.js"
+  },
+
+  "side_panel": {
+    "default_path": "side-panel/side-shub-panel.html"
+  },
+
+  "permissions": [
+    "tabs",
+    "notifications",
+    "storage",
+    "contextMenus",
+    "clipboardWrite",
+    "cookies",
+    "sidePanel"
+  ],
+
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Open Side Panel"
+    }
+  },
+
+  "host_permissions": ["<all_urls>"],
+
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "matches": ["<all_urls>"],
+      "css": ["content-script/contentScript.css"],
+      "js": [
+        "content-script/injectedScript.js",
+        "content-script/consoleApi.js",
+        "content-script/dom-inspector.js",
+        "content-script/contentScript.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+
+  "offline_enabled": true
+}

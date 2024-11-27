@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+        }
+        .warning-icon{
+            background: url("../icons/warning_red.svg") no-repeat center;
+            background-size: 25px;
+            width: 25px;
+            height: 25px;
+            margin: auto;
+            margin-bottom: 5px;
+        }
+        .content{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="warning-icon"></div>
+        <div class="content">Waiting For Devtools to be closed.</div>
+        <div class="content">SHP Side Panel doesn't work if SHP is opened in Devtools</div>
+    </div>
+</body>
+</html>

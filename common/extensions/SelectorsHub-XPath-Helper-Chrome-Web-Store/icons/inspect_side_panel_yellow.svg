@@ -1,0 +1,9 @@
+<svg width="125" height="126" viewBox="0 0 125 126" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 2.5L124 2.5" stroke="#FFE0A6" stroke-width="15" stroke-dasharray="10 10"/>
+<path d="M0 123L58 123" stroke="#FFE0A6" stroke-width="15" stroke-dasharray="10 10"/>
+<line x1="121.5" y1="54" x2="121.5" y2="1.09278e-07" stroke="#FFE0A6" stroke-width="15" stroke-dasharray="10 10"/>
+<line x1="2.5" y1="125" x2="2.50001" y2="-1.09278e-07" stroke="#FFE0A6" stroke-width="15" stroke-dasharray="10 10"/>
+<line x1="55.5756" y1="53.1963" x2="121.862" y2="119.483" stroke="#FFE0A6" stroke-width="10" stroke-linecap="round"/>
+<path d="M54.5396 53.1963H120.794" stroke="#FFE0A6" stroke-width="10" stroke-linecap="round"/>
+<path d="M54.5396 122.657L54.5396 53.196" stroke="#FFE0A6" stroke-width="10" stroke-linecap="round"/>
+</svg>

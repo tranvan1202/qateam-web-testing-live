@@ -1,0 +1,54 @@
+/**
+ * Created by sanjay kumar on 25/06/2020.
+ */
+
+
+[xpath], [css]{
+    outline: 2px dashed #00bcd4 !important;
+}
+[xpath="1"],  [css="1"]{
+    outline: 2px dashed #f29a00 !important;
+}
+
+svg[xpath],  svg[css]{
+	outline: none !important;
+    border: 2px dashed #00bcd4 !important;
+}
+
+svg[xpath="1"],  svg[css="1"]{
+	outline: none !important;
+    border: 2px dashed #f29a00 !important;
+}
+
+
+.inspect_background{
+    background-color: rgba(255, 224, 166, 0.5);
+}
+
+.shub-transparent-inspector{
+    z-index: 9999999;
+    position: fixed;
+    background-color: transparent;
+    pointer-events: none;
+}
+
+.shub-visible-inspector{
+    z-index: 9999999;
+    position: fixed;
+    background-color: #D0A149;
+    opacity: 0.5;
+    pointer-events: none;
+}
+.shub-comment-overlay{
+    z-index: 9999999;
+    position: fixed;
+    background-color: #d9433b;
+    text-align: center;
+    color: #ffffff;
+    opacity: 1;
+    padding: 0px 5px;
+    pointer-events: none;
+    font-size: 14px;
+    /* line-height: 20px; */
+}
+

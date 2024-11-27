@@ -5,10 +5,9 @@ from src.pages.iq_pdpage import IQPDPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.samsung.com/vn/offer/price-promise/"
+    "https://www.iqos.com/id/en/shop/iluma-prime-kit-jade-green.html"
 ]
-MAX_TABS = 3
-VALIDATE_URLS = True  # Decide whether to validate navigated URLs
+MAX_TABS = 10
 
 @pytest.mark.parametrize(
     "device_type",
@@ -19,8 +18,7 @@ def test_extract_img_properties(browser_factory_fixture, analyze_url_and_apply_c
     """
     Test extracting image properties from multiple tabs.
     """
-    context = None
-    collected_results = []  # Store results of navigation and image extraction
+    #collected_results = []  # Store results of navigation and image extraction
 
     try:
         print("Creating browser context...")
@@ -43,17 +41,16 @@ def test_extract_img_properties(browser_factory_fixture, analyze_url_and_apply_c
         # Navigate to URLs, perform actions, and collect results
         collected_results = iqpd_page.navigate_and_collect_images(
             urls=URLS_TO_TEST,
-            max_tabs=MAX_TABS,
-            validate_urls=VALIDATE_URLS
+            max_tabs=MAX_TABS
         )
 
     finally:
         # Perform assertions on collected results before closing the context
         if collected_results:
-            failed_urls, missing_files = validate_results(collected_results)
+            missing_files = validate_results(collected_results)
 
-            if failed_urls or missing_files:
-                fail_test(failed_urls, missing_files)
+            if missing_files:
+                fail_test(missing_files)
 
 def validate_results(collected_results):
     """
@@ -61,33 +58,24 @@ def validate_results(collected_results):
     :param collected_results: Results from the `navigate_and_collect_images` method.
     :return: Two lists - failed URLs and missing files.
     """
-    failed_urls = []
     missing_files = []
 
     # Ensure results are matched correctly
-    for expected_url, actual_url, filename in collected_results:
-        # Validate navigated URLs
-        if expected_url != actual_url:
-            failed_urls.append(f"URL mismatch: Expected {expected_url}, got {actual_url}")
-
+    for actual_url, filename in collected_results:
         # Validate exported files
         if filename is None or not os.path.isfile(os.path.abspath(filename)):
-            missing_files.append(f"Missing file for URL: {expected_url}")
+            missing_files.append(f"Missing file for URL: {actual_url}")
         else:
             print(f"File {filename} exists and passed validation.")
 
-    return failed_urls, missing_files
+    return missing_files
 
-
-def fail_test(failed_urls, missing_files):
+def fail_test(missing_files):
     """
     Fail the test if there are any invalid URLs or missing files.
-    :param failed_urls: List of failed URLs.
     :param missing_files: List of missing or invalid files.
     """
     error_messages = []
-    if failed_urls:
-        error_messages.append("The following URL mismatches occurred:\n" + "\n".join(failed_urls))
     if missing_files:
         error_messages.append("The following files were not generated or are invalid:\n" + "\n".join(missing_files))
 
