@@ -1,9 +1,38 @@
+# python-tests/src/cores/browser_manager.py
+
 from playwright.sync_api import Playwright, BrowserContext
 import os
 
 class BrowserManager:
+    unwanted_tabs = ["chrome-extension://", "https://chrispederick.com/"]
+
     def __init__(self, playwright: Playwright):
         self.playwright = playwright
+
+    def _setup_persistent_context(self, **context_args) -> BrowserContext:
+        """Configure and launch a persistent browser context with specified arguments."""
+        browser = self.playwright.chromium.launch_persistent_context(**context_args)
+
+        # Only handle unwanted tabs if extensions are enabled
+        if context_args.get("args"):
+            self._close_unwanted_tabs(browser)
+
+        return browser
+
+    def _close_unwanted_tabs(self, browser):
+        """Close all existing unwanted tabs and set up a listener for future tabs."""
+        # Close currently open unwanted tabs
+        for page in browser.pages:
+            self._close_if_unwanted(page)
+
+        # Set up a listener for future unwanted tabs
+        browser.on("page", lambda page: page.once("load", lambda: self._close_if_unwanted(page)))
+
+    def _close_if_unwanted(self, page):
+        """Close the page if it matches an unwanted URL pattern."""
+        if any(unwanted in page.url for unwanted in self.unwanted_tabs):
+            print(f"Closing unwanted tab with URL: {page.url}")
+            page.close()
 
     def _find_extension_paths(self, directory: str) -> list:
         """Locate paths for Chrome extensions inside the given directory."""
@@ -12,33 +41,6 @@ class BrowserManager:
             if 'manifest.json' in files:
                 extension_paths.append(root)
         return extension_paths
-
-    def _setup_persistent_context(self, **context_args) -> BrowserContext:
-        """Configure and launch a persistent browser context with specified arguments."""
-        browser = self.playwright.chromium.launch_persistent_context(**context_args)
-
-        # Only handle unwanted tabs if extensions are enabled
-        if context_args.get("args"):
-            unwanted_tabs = ["chrome-extension://", "https://chrispederick.com/"]
-            self._close_unwanted_tabs(browser, unwanted_tabs)
-
-        return browser
-
-    def _close_unwanted_tabs(self, browser, unwanted_tabs: list):
-        """Close tabs matching unwanted URLs."""
-        for page in browser.pages:
-            if any(unwanted in page.url for unwanted in unwanted_tabs):
-                print(f"Closing unwanted tab with URL: {page.url}")
-                page.close()
-
-        # Set up a listener for future unwanted tabs
-        browser.on("page", lambda page: page.once("load", lambda: self._close_if_unwanted(page, unwanted_tabs)))
-
-    def _close_if_unwanted(self, page, unwanted_tabs: list):
-        """Close the page if it matches an unwanted URL pattern."""
-        if any(unwanted in page.url for unwanted in unwanted_tabs):
-            print(f"Closing unwanted tab with URL: {page.url}")
-            page.close()
 
     def create_context(
         self,

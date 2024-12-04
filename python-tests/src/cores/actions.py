@@ -3,6 +3,8 @@
 import time
 import json
 import os
+from audioop import error
+
 import logging
 import re
 from urllib.parse import urlparse
@@ -38,16 +40,42 @@ class Actions:
             logging.error(f"Failed to load locators.json: {e}")
             return {}
 
-    def click_js_declared_elements(self, jsonValues, force_click=True):
+    def analyze_url_and_apply_cookie(self, context, url):
+        """
+        Analyze the URL and apply cookies dynamically.
+        :param context: Playwright BrowserContext.
+        :param url: The URL to analyze and apply cookies for.
+        """
+        try:
+            from src.cores.auth_manager import AuthManager
+            from src.cores.cookie_manager import configure_cookies_lib, set_cookies_in_context
+
+            auth_manager = AuthManager(self.config)
+            url_info = auth_manager.analyze_url(url)
+            base_domain = url.split("/")[2]
+
+            cookies = configure_cookies_lib(auth_manager, url_info, base_domain)
+            set_cookies_in_context(context, cookies)
+            logging.info(f"Cookies applied successfully for URL: {url}")
+
+        except ImportError as e:
+            logging.error(f"Failed to import required modules for URL '{url}': {e}")
+            raise  # Re-raise the exception to signal failure
+
+        except Exception as e:
+            logging.error(f"Error analyzing URL '{url}' or applying cookies: {e}")
+            raise  # Re-raise the exception to signal failure
+
+    def click_js_declared_elements(self, json_values, force_click=True):
         """
         Clicks elements defined in the JSON declaration based on their selectors.
         Supports XPath, CSS selector, and class name.
 
-        :param jsonValues: Key from locators.json containing the selector values.
+        :param json_values: Key from locators.json containing the selector values.
         :param force_click: Whether to force the click action.
         """
         # Retrieve the list of selectors from locators.json
-        selectors = self.locators.get(jsonValues, [])
+        selectors = self.locators.get(json_values, [])
 
         for selector in selectors:
             # Determine the type of selector
@@ -146,10 +174,9 @@ class Actions:
         # Fetch the wait time based on the device configuration from config.json
         return self.config.get("testSetup", {}).get(f"{device}Device", {}).get("button_waitTime", 1000)
 
-    def wait_and_click_element_by_key(
+    def wait_and_click_element(
             self,
-            jsonKey,
-            jsonValueKey,
+            locator_string,
             timeout=5000,
             force_click=True,
             repeat_until_disabled=False,
@@ -157,10 +184,9 @@ class Actions:
             interact_all=False
     ):
         """
-        Waits for an element (or all matching elements) to become visible and clicks it/them. Optionally repeats until the element becomes disabled.
+        Wait for an element (or all matching elements) to become visible and click it/them.
 
-        :param jsonKey: Key in the JSON structure (e.g., "iqLazyLoadTriggerElement").
-        :param jsonValueKey: Specific subkey whose value contains the selector (e.g., "pdp_MainImg").
+        :param locator_string: The CSS or XPath selector string for the element(s).
         :param timeout: Maximum time to wait for the element (in milliseconds).
         :param force_click: Whether to force the click action.
         :param repeat_until_disabled: If True, continues clicking until the element is disabled.
@@ -168,33 +194,20 @@ class Actions:
         :param interact_all: If True, interacts with all matching elements; otherwise, interacts with the first one.
         :return: True if at least one element was clicked successfully, False otherwise.
         """
-        # Retrieve the JSON object corresponding to jsonKey
-        json_object = self.locators.get(jsonKey, {})
-
-        if not json_object:
-            logging.warning(f"No entry found for JSON key '{jsonKey}'.")
-            return False
-
-        # Retrieve the specific selector using jsonValueKey
-        selector = json_object.get(jsonValueKey)
-
-        if not selector:
-            logging.warning(f"No selector found for subkey '{jsonValueKey}' in JSON key '{jsonKey}'.")
-            return False
-
-        # Determine the type of selector
-        if selector.startswith("//"):  # XPath selector
-            locator = self.page.locator(selector)
-        elif re.search(r"[#.\[\]>+~]", selector):  # Complex CSS selector
-            locator = self.page.locator(selector)
-        else:  # Assume it's a simple class name
-            locator = self.page.locator(f".{selector}")
-
         try:
+            # Determine the type of locator and create a Playwright locator object
+            if locator_string.startswith("//"):  # XPath selector
+                locator = self.page.locator(locator_string)
+            elif re.search(r"[#.\[\]>+~]", locator_string):  # Complex CSS selector
+                locator = self.page.locator(locator_string)
+            else:  # Assume it's a simple class name
+                locator = self.page.locator(f".{locator_string}")
+
             # Wait for the first element to become visible
             locator.first.wait_for(state="visible", timeout=timeout)
-            logging.info(f"Element(s) with selector '{selector}' is/are visible.")
+            logging.info(f"Element(s) with locator '{locator_string}' is/are visible.")
 
+            # Determine the elements to interact with
             elements_to_interact = locator.all() if interact_all else [locator.first]
             clicked_at_least_one = False
 
@@ -217,7 +230,7 @@ class Actions:
 
                         # Proceed to click the element
                         logging.info(
-                            f"Clicking on element {idx + 1} with selector '{selector}' (Attempt {retries + 1})."
+                            f"Clicking on element {idx + 1} with locator '{locator_string}' (Attempt {retries + 1})."
                         )
                         element.click(force=force_click)
                         clicked_at_least_one = True
@@ -229,23 +242,60 @@ class Actions:
                         # Check if the element is disabled
                         is_disabled = element.is_disabled()
                         if is_disabled:
-                            logging.info(f"Element {idx + 1} with selector '{selector}' is now disabled.")
+                            logging.info(f"Element {idx + 1} with locator '{locator_string}' is now disabled.")
                             break
 
                         # Increment retry counter and check against max_retries
                         retries += 1
                         if retries >= max_retries:
                             logging.warning(
-                                f"Maximum retries reached ({max_retries}) for element {idx + 1} with selector '{selector}'."
+                                f"Maximum retries reached ({max_retries}) for element {idx + 1} with locator '{locator_string}'."
                             )
                             break
 
                     except Exception as e:
-                        logging.error(f"Error interacting with element {idx + 1} '{selector}': {str(e)}")
+                        logging.error(f"Error interacting with element {idx + 1} '{locator_string}': {str(e)}")
                         break
 
             return clicked_at_least_one
 
         except Exception as e:
-            logging.error(f"Error waiting for elements with selector '{selector}': {str(e)}")
+            logging.error(f"Error waiting for elements with locator '{locator_string}': {str(e)}")
             return False
+
+    def scroll_pages_with_synchronization(self, pages, config):
+        """
+        Scroll multiple pages from top to bottom while synchronizing at specific element locator milestones.
+        :param pages: List of Playwright Page objects to scroll.
+        :param config: Configuration dictionary containing scroll speed, scroll distance, and milestones.
+        """
+        scroll_speed = config.get("scroll_speed", 0.1)  # Default: 0.1 seconds between scrolls
+        scroll_distance = config.get("scroll_distance", 300)  # Default: 300 pixels per scroll step
+        milestones = config.get("milestones", [])  # List of element locators to synchronize at
+
+        # Scroll to the top of all pages
+        for page in pages:
+            page.evaluate("window.scrollTo(0, 0)")
+
+        # Determine the maximum scroll height across all pages
+        max_scroll_height = max(page.evaluate("document.body.scrollHeight") for page in pages)
+
+        # Scroll pages step by step
+        current_scroll_position = 0
+        while current_scroll_position < max_scroll_height:
+            for page in pages:
+                # Scroll down by scroll_distance
+                page.evaluate(f"window.scrollBy(0, {scroll_distance})")
+
+            # Wait at milestones if any element matches
+            for milestone in milestones:
+                for page in pages:
+                    if page.locator(milestone).is_visible():
+                        # Wait for the milestone element to synchronize
+                        print(f"Milestone reached: {milestone}")
+                        time.sleep(scroll_speed)
+
+            current_scroll_position += scroll_distance
+            time.sleep(scroll_speed)
+
+        print("Scrolling completed for all pages.")

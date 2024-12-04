@@ -4,16 +4,13 @@
     "passwordField": "#password",
     "loginButton": ".login-button"
   },
-
   "ssLazyLoadTriggerElementClassNames": [
     "indicator__item","tab-container__item","tab__item","kv-tab-container__tab-title"
   ],
-
-  "iqLazyLoadTriggerElement": {
-    "pdp_MainImg": "div[class='swiper-wrapper align-items-center'] div[class='swiper-slide text-center swiper-slide-active']",
-    "pdp_ZoomModalNextArrow": "a[data-pmi-el='modal-swiper-button-next']",
-    "pdp_ZoomModalPrevArrow": "a[data-pmi-el='modal-swiper-button-prev']",
-    "pdp_ZoomModalThumbnails": "//body//div//div[@data-pmi-el='modal-swiper-thumbs']//div//div",
-    "pdp_ZoomModalCloseButton": "button[data-bs-dismiss='modal']"
+  "ssElements": {
+    "pdp_DisplayNameText": "div[class='pd-buying-tool__info'] h2[class='pd-info__title']",
+    "pdp_USPItems": ".pd-info__usp-list ul[class='dot-list'] li",
+    "pdp_BadgeText": ".pd-info__badge-icon",
+    "pdp_GalleryCarouselItems": "//ul[contains(@class,'pd-header-gallery__thumbnail-list swiper-wrapper')] /li"
   }
 }

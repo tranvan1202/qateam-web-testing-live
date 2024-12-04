@@ -1,24 +1,23 @@
 # python-tests/tests/suites/test_iqpdp_extract_img_properties_suite.py
 import os
 import pytest
-from src.pages.iq_pdpage import IQPDPage
+from src.pages.i_pdpage import IQPDPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.iqos.com/id/en/shop/iluma-prime-kit-jade-green.html"
+    "https://www.pp.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html"
 ]
-MAX_TABS = 10
+max_tabs = 10  # If >1, treat as multiple tabs
 
 @pytest.mark.parametrize(
     "device_type",
     ["pc", "mo"],
     ids=["device_pc", "device_mo"]
 )
-def test_extract_img_properties(browser_factory_fixture, analyze_url_and_apply_cookie, device_type):
+def test_extract_img_properties(browser_factory_fixture, device_type):
     """
     Test extracting image properties from multiple tabs.
     """
-    #collected_results = []  # Store results of navigation and image extraction
 
     try:
         print("Creating browser context...")
@@ -34,14 +33,11 @@ def test_extract_img_properties(browser_factory_fixture, analyze_url_and_apply_c
         page = context.pages[0] if context.pages else context.new_page()
         iqpd_page = IQPDPage(page, device=device_type)
 
-        # Apply cookies to all URLs before navigation
-        for url in URLS_TO_TEST:
-            analyze_url_and_apply_cookie(context, url)
-
         # Navigate to URLs, perform actions, and collect results
-        collected_results = iqpd_page.navigate_and_collect_images(
+        collected_results = iqpd_page.open_tabs_and_perform_actions(
+            context,
             urls=URLS_TO_TEST,
-            max_tabs=MAX_TABS
+            max_tabs=max_tabs
         )
 
     finally:
@@ -80,7 +76,6 @@ def fail_test(missing_files):
         error_messages.append("The following files were not generated or are invalid:\n" + "\n".join(missing_files))
 
     pytest.fail("\n\n".join(error_messages))
-
 
 # Run tests in parallel with console logging when the script is executed directly
 if __name__ == "__main__":
