@@ -2,3 +2,5 @@
 /python-tests/src/cores/auth_manager.py
 .idea/
 /python-tests/tests/scripts/test_qure_content_tree.py
+/python-tests/src/pages/s_login_env_index_page.py
+/python-tests/src/pages/s_login_env_success_page.py

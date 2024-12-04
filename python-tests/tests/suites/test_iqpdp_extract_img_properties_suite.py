@@ -5,7 +5,7 @@ from src.pages.i_pdpage import IQPDPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.pp.iqos.com/id/en/shop/iluma-prime-kit-golden-khaki.html"
+    "https://znews.vn/"
 ]
 max_tabs = 10  # If >1, treat as multiple tabs
 

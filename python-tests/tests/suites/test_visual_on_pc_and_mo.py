@@ -5,9 +5,7 @@ from src.pages.s_normal_pdpage import SSPDPage
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.pp.iqos.com/id/en/shop/iluma-prime-kit-jade-green.html",
-    "https://www.pp.iqos.com/id/en/shop/iluma-prime-kit-obsidian-black.html",
-    "https://www.pp.iqos.com/id/en/iqos-heated-tobacco/buy-terea.html"
+    "https://znews.vn/"
 ]
 max_tabs = 10  # If >1, treat as multiple tabs
 validate_urls = True  # Decide whether to validate navigated URLs
