@@ -9,7 +9,7 @@ class IHybrisPromotionRulesPage(BasePage):
         self.ih_marketing_promotion_rules_tab_name = page.locator("td[class='y-tree-icon-hmc_typenode_promotion_rules z-treecell'] span[class='z-label']")
         self.ih_marketing_promotion_rules_search = page.locator("input[placeholder='Type to search']")
 
-    def trigger_lazy_load_actions(self, page=None):
+    def trigger_customize_actions(self, page=None):
         """
         Override trigger_load_actions to define IQPD-specific actions.
         :param page: Optional specific page object (defaults to self.page).

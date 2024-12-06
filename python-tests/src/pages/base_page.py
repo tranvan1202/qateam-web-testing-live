@@ -41,8 +41,8 @@ class BasePage(ABC):
 
                         # Perform actions on the page
                         page.bring_to_front()
-                        self.trigger_lazy_load_action_list(page)
-                        self.post_lazy_load_trigger_actions_hook(page, action_flags)
+                        self.trigger_action_list(page)
+                        self.post_trigger_actions_hook(page, action_flags)
 
                         # Collect tab results if requested
                         if collect_url_by_tab:
@@ -67,10 +67,10 @@ class BasePage(ABC):
                         print(f"Performing actions on tab {idx + 1}")
 
                         # Trigger lazy load
-                        self.trigger_lazy_load_action_list(page)
+                        self.trigger_action_list(page)
 
                         # Perform post-actions
-                        self.post_lazy_load_trigger_actions_hook(page, action_flags)
+                        self.post_trigger_actions_hook(page, action_flags)
 
                         # Collect tab results if requested
                         if collect_url_by_tab:
@@ -155,7 +155,7 @@ class BasePage(ABC):
         except Exception as e:
             print(f"Failed to navigate to {url}: {e}")
 
-    def trigger_lazy_load_action_list(self, page=None):
+    def trigger_action_list(self, page=None):
         """
         Perform common actions such as scrolling and button injection.
         :param page: The page object to perform actions on (defaults to self.page).
@@ -164,18 +164,17 @@ class BasePage(ABC):
 
         page.wait_for_load_state("domcontentloaded", timeout=10000)
         self.actions.scroll_to_bottom(page=page)
-        #self.actions.scroll_to_top(page=page)
-        self.trigger_lazy_load_actions(page=page)
+        self.trigger_customize_actions(page=page)
         self.actions.scroll_to_top(page=page)
         self.actions.inject_button_script(self.actions.get_wait_time(self.device),page=page)
         self.actions.wait_for_button_trigger_or_timeout(self.device,page=page)
 
-    def post_lazy_load_trigger_actions_hook(self, page=None):
+    def post_trigger_actions_hook(self, page=None):
         """
         Perform page-specific actions after lazy loading.
         This method should be overridden by child classes to add specific actions.
         """
         pass
 
-    def trigger_lazy_load_actions(self, page=None):
+    def trigger_customize_actions(self, page=None):
         pass

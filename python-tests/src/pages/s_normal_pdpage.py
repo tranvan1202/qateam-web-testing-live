@@ -9,7 +9,7 @@ class SSPDPage(BasePage):
         self.s_pdp_header_gallery_thumbnails = page.locator("div[class~='pd-header-gallery__thumbnail-swiper'] ul[role='list'] li")
         self.s_pdp_extract_img_area = page.locator("")
 
-    def trigger_lazy_load_actions(self, page=None):
+    def trigger_customize_actions(self, page=None):
         """
         Default implementation is to click declared elements.
         """
@@ -19,7 +19,7 @@ class SSPDPage(BasePage):
         self.actions.wait_and_click_element(self.s_pdp_swiper_pagination_bullet, interact_all=True, page=page)
         self.actions.wait_and_click_element(self.s_pdp_header_gallery_thumbnails, interact_all=True, page=page)
 
-    def post_lazy_load_trigger_actions_hook(self, page=None, action_flags=None):
+    def post_trigger_actions_hook(self, page=None, action_flags=None):
         page = page or self.page
         action_flags = action_flags or {}
 

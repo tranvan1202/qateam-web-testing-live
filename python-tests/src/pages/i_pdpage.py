@@ -12,7 +12,7 @@ class IQPDPage(BasePage):
         self.i_pdp_modal_close_button = page.locator("button[data-bs-dismiss='modal']")
         self.i_pdp_extract_img_area = page.locator("main[role='main']")
 
-    def trigger_lazy_load_actions(self, page=None):
+    def trigger_customize_actions(self, page=None):
         """
         Override trigger_load_actions to define IQPD-specific actions.
         :param page: Optional specific page object (defaults to self.page).
@@ -28,7 +28,7 @@ class IQPDPage(BasePage):
         time.sleep(1)
         self.actions.wait_and_click_element(self.i_pdp_modal_close_button, page=page)
 
-    def post_lazy_load_trigger_actions_hook(self, page=None, action_flags=None):
+    def post_trigger_actions_hook(self, page=None, action_flags=None):
         page = page or self.page
         action_flags = action_flags or {}
 
