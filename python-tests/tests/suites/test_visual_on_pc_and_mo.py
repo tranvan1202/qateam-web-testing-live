@@ -4,10 +4,10 @@ from src.cores.page_factory import PageFactory
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://backoffice.pp.iqos.com/backoffice/"
+    "https://zingnews.vn/"
 ]
-domain = "iq"
-page_type = "hybris"
+domain = "ss"
+page_type = "normal_pdp"
 max_tabs = 1  # If >1, treat as multiple tabs
 validate_urls = True  # Decide whether to validate navigated URLs
 
