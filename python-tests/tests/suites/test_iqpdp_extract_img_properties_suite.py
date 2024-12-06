@@ -1,12 +1,15 @@
 # python-tests/tests/suites/test_iqpdp_extract_img_properties_suite.py
 import os
 import pytest
-from src.pages.i_pdpage import IQPDPage
+from src.cores.page_factory import PageFactory
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://znews.vn/"
+    "https://www.samsung.com/my/business/washers-and-dryers/washing-machines/wa5000c-top-load-ecobubble-digital-inverter-technology-super-speed-wa13cg5745bvfq/",
+    "https://www.samsung.com/vn/watches/galaxy-fit/galaxy-fit3-dark-gray-bluetooth-sm-r390nzaaxxv/"
 ]
+domain = "ss"
+page_type = "normal_pdp"
 max_tabs = 10  # If >1, treat as multiple tabs
 
 @pytest.mark.parametrize(
@@ -18,7 +21,6 @@ def test_extract_img_properties(browser_factory_fixture, device_type):
     """
     Test extracting image properties from multiple tabs.
     """
-
     try:
         print("Creating browser context...")
         context = browser_factory_fixture(
@@ -31,13 +33,14 @@ def test_extract_img_properties(browser_factory_fixture, device_type):
 
         # Initialize IQPDPage
         page = context.pages[0] if context.pages else context.new_page()
-        iqpd_page = IQPDPage(page, device=device_type)
+        page_object = PageFactory.create_page(domain, page_type, page, device=device_type)
 
         # Navigate to URLs, perform actions, and collect results
-        collected_results = iqpd_page.open_tabs_and_perform_actions(
+        collected_results = page_object.open_tabs_and_perform_actions(
             context,
             urls=URLS_TO_TEST,
-            max_tabs=max_tabs
+            max_tabs=max_tabs,
+            action_flags={"extract_image_properties_to_excel": True}
         )
 
     finally:

@@ -8,7 +8,7 @@ import platform
 
 class ExcelWriter:
     def __init__(self, base_path=None):
-        # Determine the project root and set the reports path
+        # Determine the domain root and set the reports path
         if base_path is None:
             root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
             base_path = os.path.join(root_dir, 'common', 'reports')

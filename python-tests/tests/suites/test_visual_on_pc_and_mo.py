@@ -1,15 +1,15 @@
 # python-tests/tests/suites/test_visual_on_pc_and_mo.py
-
 import pytest
-from src.pages.s_normal_pdpage import SSPDPage
+from src.cores.page_factory import PageFactory
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://znews.vn/"
+    "https://backoffice.pp.iqos.com/backoffice/"
 ]
-max_tabs = 10  # If >1, treat as multiple tabs
+domain = "iq"
+page_type = "hybris"
+max_tabs = 1  # If >1, treat as multiple tabs
 validate_urls = True  # Decide whether to validate navigated URLs
-s_login_env = "qa"
 
 @pytest.mark.parametrize(
     "device_type", ["pc", "mo"], ids=["device_pc", "device_mo"]
@@ -26,17 +26,16 @@ def test_access_correct_url(browser_factory_fixture, device_type):
     )
     print("Browser context created.")
 
-    # Initialize Page Object
     page = context.pages[0] if context.pages else context.new_page()
-    ss_normal_pd_page = SSPDPage(page, device=device_type)
+    page_object = PageFactory.create_page(domain, page_type, page, device=device_type)
 
     # Perform navigation and actions
-    validate_url_tab_results = ss_normal_pd_page.open_tabs_and_perform_actions(
+    validate_url_tab_results = page_object.open_tabs_and_perform_actions(
         context,
         urls=URLS_TO_TEST,
         max_tabs=max_tabs,
         collect_url_by_tab=validate_urls,
-        s_login_env=s_login_env
+        action_flags=None
     )
 
     # Validate navigated URLs if validation is enabled

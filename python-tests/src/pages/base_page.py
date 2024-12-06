@@ -1,6 +1,7 @@
 # python-tests/src/pages/base_page.py
-
+import time
 from abc import ABC
+
 from playwright.sync_api import Page
 from src.cores.actions import Actions
 from src.cores.image_properties_extractor import ImagePropertiesExtractor
@@ -16,16 +17,13 @@ class BasePage(ABC):
         self.image_extractor = ImagePropertiesExtractor(page)
         self.excel_writer = ExcelWriter()
 
-    def _resolve_page(self, page=None):
-        """Resolve the target page for actions, defaulting to self.page."""
-        return page or self.page
-
-    def open_tabs_and_perform_actions(self, context, urls, max_tabs=1, collect_url_by_tab=False, s_login_env: str = "qa"):
+    def open_tabs_and_perform_actions(self, context, urls, max_tabs=1, collect_url_by_tab=False, s_login_env: str = "qa", action_flags=None):
         """
         Open tabs and perform actions for the given URLs.
         If max_tabs=1, reuse the first tab for all URLs.
         """
         validate_url_results_by_tab = []
+        action_flags = action_flags or {}
 
         try:
             # Step 1: Preprocess URLs
@@ -44,7 +42,7 @@ class BasePage(ABC):
                         # Perform actions on the page
                         page.bring_to_front()
                         self.trigger_lazy_load_action_list(page)
-                        self.post_lazy_load_trigger_actions_hook(page)
+                        self.post_lazy_load_trigger_actions_hook(page, action_flags)
 
                         # Collect tab results if requested
                         if collect_url_by_tab:
@@ -55,7 +53,7 @@ class BasePage(ABC):
                     except Exception as e:
                         print(f"Error processing URL {url}: {e}")
                         if collect_url_by_tab:
-                            validate_url_results_by_tab.append((idx + 1, url, "Error"))
+                            validate_url_results_by_tab.append((idx + 1, url, {e}))
 
             # Case 2: max_tabs > 1 - Open and process multiple tabs simultaneously
             else:
@@ -72,7 +70,7 @@ class BasePage(ABC):
                         self.trigger_lazy_load_action_list(page)
 
                         # Perform post-actions
-                        self.post_lazy_load_trigger_actions_hook(page)
+                        self.post_lazy_load_trigger_actions_hook(page, action_flags)
 
                         # Collect tab results if requested
                         if collect_url_by_tab:
@@ -83,7 +81,7 @@ class BasePage(ABC):
                     except Exception as e:
                         print(f"Error during actions on tab {idx + 1}: {e}")
                         if collect_url_by_tab:
-                            validate_url_results_by_tab.append((idx + 1, expected_url, "Error"))
+                            validate_url_results_by_tab.append((idx + 1, expected_url, {e}))
 
         except Exception as main_error:
             print(f"Error during navigation and actions: {main_error}")
@@ -150,7 +148,7 @@ class BasePage(ABC):
         :param url: The target URL.
         :param page: Optional page object for navigation (defaults to self.page).
         """
-        page = self._resolve_page(page)
+        page = page or self.page
         print(f"Navigating to URL: {url}")
         try:
             page.goto(url, timeout=60000)
@@ -162,22 +160,22 @@ class BasePage(ABC):
         Perform common actions such as scrolling and button injection.
         :param page: The page object to perform actions on (defaults to self.page).
         """
-        page = self._resolve_page(page)
-        self.actions.page = page
-        self.actions.scroll_to_bottom()
-        self.trigger_lazy_load_actions(page)
-        self.actions.scroll_to_top()
-        self.actions.inject_button_script(self.actions.get_wait_time(self.device))
-        self.actions.wait_for_button_trigger_or_timeout(self.device)
+        page = page or self.page
+
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+        self.actions.scroll_to_bottom(page=page)
+        #self.actions.scroll_to_top(page=page)
+        self.trigger_lazy_load_actions(page=page)
+        self.actions.scroll_to_top(page=page)
+        self.actions.inject_button_script(self.actions.get_wait_time(self.device),page=page)
+        self.actions.wait_for_button_trigger_or_timeout(self.device,page=page)
 
     def post_lazy_load_trigger_actions_hook(self, page=None):
         """
         Perform page-specific actions after lazy loading.
         This method should be overridden by child classes to add specific actions.
         """
-        print(f"Performing post-actions for page: {page.url}")
+        pass
 
     def trigger_lazy_load_actions(self, page=None):
-        page = self._resolve_page(page)
-        self.actions.page = page
-        self.actions.click_js_declared_elements("test_ssLazyLoadTriggerElementClassNames")
+        pass
