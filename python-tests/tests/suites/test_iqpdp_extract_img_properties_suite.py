@@ -5,12 +5,11 @@ from src.cores.page_factory import PageFactory
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://www.samsung.com/my/business/washers-and-dryers/washing-machines/wa5000c-top-load-ecobubble-digital-inverter-technology-super-speed-wa13cg5745bvfq/",
-    "https://www.samsung.com/vn/watches/galaxy-fit/galaxy-fit3-dark-gray-bluetooth-sm-r390nzaaxxv/"
+    "https://en.wikipedia.org/wiki/Lorem_ipsum"
 ]
 domain = "ss"
 page_type = "normal_pdp"
-max_tabs = 10  # If >1, treat as multiple tabs
+max_tabs = 1  # If >1, treat as multiple tabs
 
 @pytest.mark.parametrize(
     "device_type",

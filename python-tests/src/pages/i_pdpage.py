@@ -10,9 +10,9 @@ class IQPDPage(BasePage):
         self.i_pdp_modal_zoom_prev_arrow = page.locator("a[data-pmi-el='modal-swiper-button-prev']")
         self.i_pdp_modal_zoom_thumbnails = page.locator("//body//div//div[@data-pmi-el='modal-swiper-thumbs']//div//div")
         self.i_pdp_modal_close_button = page.locator("button[data-bs-dismiss='modal']")
-        self.i_pdp_extract_img_area = page.locator("main[role='main']")
+        self.i_pdp_extract_img_area = "body"
 
-    def trigger_customize_actions(self, page=None):
+    def trigger_customize_actions_hook(self, page=None):
         """
         Override trigger_load_actions to define IQPD-specific actions.
         :param page: Optional specific page object (defaults to self.page).
@@ -20,7 +20,6 @@ class IQPDPage(BasePage):
         page = page or self.page
 
         #Trigger lazy-load elements
-        page.wait_for_load_state("domcontentloaded")
         self.actions.wait_and_click_element(self.i_pdp_main_img, page=page)
         self.actions.wait_and_click_element(self.i_pdp_modal_zoom_next_arrow, repeat_until_disabled=True, page=page)
         self.actions.wait_and_click_element(self.i_pdp_modal_zoom_prev_arrow, repeat_until_disabled=True, page=page)
@@ -28,11 +27,25 @@ class IQPDPage(BasePage):
         time.sleep(1)
         self.actions.wait_and_click_element(self.i_pdp_modal_close_button, page=page)
 
-    def post_trigger_actions_hook(self, page=None, action_flags=None):
+    def post_trigger_actions_hook(self, page=None, action_flags=None, tab_number=None, url=None):
         page = page or self.page
         action_flags = action_flags or {}
 
-        # Action: Extract images
+        # Option 1: Collect URL data by tab
+        if action_flags.get("collect_url_by_tab", False):
+            try:
+                actual_url = page.url
+                print(f"Tab {tab_number}: Expected URL {url}, Actual URL {actual_url}")
+                if not hasattr(self, "collected_url_results"):
+                    self.collected_url_results = []  # Initialize collection
+                self.collected_url_results.append((tab_number, url, actual_url))
+            except Exception as e:
+                print(f"Error collecting URL data for tab {tab_number}: {e}")
+                if not hasattr(self, "collected_url_results"):
+                    self.collected_url_results = []  # Initialize collection
+                self.collected_url_results.append((tab_number, url, str(e)))
+
+        # Action: Extract image properties
         if action_flags.get("extract_image_properties_to_excel", False):
             img_properties_to_excel_result = self.image_extractor.extract_image_properties_to_excel(
                 page=page,
@@ -41,3 +54,4 @@ class IQPDPage(BasePage):
                 excel_writer=self.excel_writer
             )
             return img_properties_to_excel_result
+

@@ -1,13 +1,16 @@
 # python-tests/src/pages/base_page.py
-import time
+import logging
 from abc import ABC
-
 from playwright.sync_api import Page
 from src.cores.actions import Actions
 from src.cores.image_properties_extractor import ImagePropertiesExtractor
 from src.cores.excel_writer import ExcelWriter
 from src.pages.s_login_env_index_page import S_Login_Env_Index_Page
+from tqdm import tqdm
 
+# Setup logging
+logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class BasePage(ABC):
     def __init__(self, page: Page, device: str):
@@ -17,12 +20,11 @@ class BasePage(ABC):
         self.image_extractor = ImagePropertiesExtractor(page)
         self.excel_writer = ExcelWriter()
 
-    def open_tabs_and_perform_actions(self, context, urls, max_tabs=1, collect_url_by_tab=False, s_login_env: str = "qa", action_flags=None):
+    def open_tabs_and_perform_actions(self, context, urls, max_tabs=1, s_login_env="qa", action_flags=None):
         """
         Open tabs and perform actions for the given URLs.
         If max_tabs=1, reuse the first tab for all URLs.
         """
-        validate_url_results_by_tab = []
         action_flags = action_flags or {}
 
         try:
@@ -34,7 +36,8 @@ class BasePage(ABC):
                 page = self.page  # Use the first opened tab
                 for idx, url in enumerate(urls):
                     try:
-                        print(f"Processing URL {idx + 1}/{len(urls)}: {url}")
+                        tab_number = idx + 1
+                        print(f"Processing URL {tab_number}/{len(urls)}: {url}")
 
                         # Navigate to URL in the same tab
                         self.navigate(url, page)
@@ -42,18 +45,12 @@ class BasePage(ABC):
                         # Perform actions on the page
                         page.bring_to_front()
                         self.trigger_action_list(page)
-                        self.post_trigger_actions_hook(page, action_flags)
 
-                        # Collect tab results if requested
-                        if collect_url_by_tab:
-                            actual_url = page.url
-                            validate_url_results_by_tab.append((idx + 1, url, actual_url))
-                            print(f"Completed actions for URL {actual_url}")
+                        # Perform post-actions (including URL collection if enabled)
+                        self.post_trigger_actions_hook(page, action_flags, tab_number, url)
 
                     except Exception as e:
                         print(f"Error processing URL {url}: {e}")
-                        if collect_url_by_tab:
-                            validate_url_results_by_tab.append((idx + 1, url, {e}))
 
             # Case 2: max_tabs > 1 - Open and process multiple tabs simultaneously
             else:
@@ -61,33 +58,23 @@ class BasePage(ABC):
                 pages = self.open_tabs(urls, max_tabs)
 
                 # Step 3: Perform actions on opened tabs
-                for idx, (page, expected_url) in enumerate(pages):
+                for idx, (page, url) in enumerate(pages):
                     try:
+                        tab_number = idx + 1
                         page.bring_to_front()
-                        print(f"Performing actions on tab {idx + 1}")
+                        print(f"Performing actions on tab {tab_number}")
 
                         # Trigger lazy load
                         self.trigger_action_list(page)
 
-                        # Perform post-actions
-                        self.post_trigger_actions_hook(page, action_flags)
-
-                        # Collect tab results if requested
-                        if collect_url_by_tab:
-                            actual_url = page.url
-                            validate_url_results_by_tab.append((idx + 1, expected_url, actual_url))
-                            print(f"Tab {idx + 1}: Completed actions for {actual_url}")
+                        # Perform post-actions (including URL collection if enabled)
+                        self.post_trigger_actions_hook(page, action_flags, tab_number, url)
 
                     except Exception as e:
-                        print(f"Error during actions on tab {idx + 1}: {e}")
-                        if collect_url_by_tab:
-                            validate_url_results_by_tab.append((idx + 1, expected_url, {e}))
+                        print(f"Error during actions on tab {tab_number}: {e}")
 
         except Exception as main_error:
             print(f"Error during navigation and actions: {main_error}")
-
-        # Return tab results for further assertions
-        return validate_url_results_by_tab if collect_url_by_tab else None
 
     def preprocess_urls(self, context, urls, login_env: str):
         """
@@ -164,17 +151,54 @@ class BasePage(ABC):
 
         page.wait_for_load_state("domcontentloaded", timeout=10000)
         self.actions.scroll_to_bottom(page=page)
-        self.trigger_customize_actions(page=page)
+        self.trigger_customize_actions_hook(page=page)
         self.actions.scroll_to_top(page=page)
         self.actions.inject_button_script(self.actions.get_wait_time(self.device),page=page)
         self.actions.wait_for_button_trigger_or_timeout(self.device,page=page)
 
-    def post_trigger_actions_hook(self, page=None):
+    def trigger_customize_actions_hook(self, page=None):
+        pass
+
+    def post_trigger_actions_hook(self, page=None, action_flags=None, tab_number=None, url=None):
         """
         Perform page-specific actions after lazy loading.
         This method should be overridden by child classes to add specific actions.
         """
         pass
 
-    def trigger_customize_actions(self, page=None):
-        pass
+    def validate_links(self, page):
+        links = page.evaluate("() => Array.from(document.querySelectorAll('a')).map(a => a.href)")
+        for link in links:
+            response = self.actions.check_url_status(link)
+            if response == 404:
+                tqdm.write(f"[FAIL] Broken Link: {link} due to response status = {response}")
+            else:
+                tqdm.write(f"[PASS] Link: {link}")
+
+    def validate_images(self, page):
+        images = page.evaluate("() => Array.from(document.querySelectorAll('img')).map(img => img.src)")
+        for image in images:
+            response = self.actions.check_url_status(image)
+            if response == 404:
+                tqdm.write(f"[FAIL] Broken Image: {image} due to response status = {response}")
+            else:
+                tqdm.write(f"[PASS] Image: {image}")
+
+    def validate_videos(self, page):
+        videos = page.evaluate("() => Array.from(document.querySelectorAll('video')).map(video => video.src)")
+        for video in videos:
+            response = self.actions.check_url_status(video)
+            if response == 404:
+                tqdm.write(f"[FAIL] Broken Video: {video} due to response status = {response}")
+            else:
+                tqdm.write(f"[PASS] Video: {video}")
+
+    def validate_js_files(self, page):
+        scripts = page.evaluate("() => Array.from(document.querySelectorAll('script')).map(script => script.src)")
+        for script in scripts:
+            if script:  # Ensure the script has a `src`
+                response = self.actions.check_url_status(script)
+                if response == 404:
+                    tqdm.write(f"[FAIL] Broken JS File: {script} due to response status = {response}")
+                else:
+                    tqdm.write(f"[PASS] JS File: {script}")

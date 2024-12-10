@@ -9,6 +9,8 @@ import re
 from urllib.parse import urlparse
 
 from playwright.sync_api import Page
+import requests
+
 
 class Actions:
     def __init__(self, page: Page, device: str):
@@ -246,3 +248,16 @@ class Actions:
             time.sleep(scroll_speed)
 
         print("Scrolling completed for all pages.")
+
+    def check_url_status(self, url):
+        """
+        Check the HTTP status of a URL.
+        :param url: The URL to check.
+        :return: The HTTP status code.
+        """
+        try:
+            response = requests.head(url, allow_redirects=True, timeout=5)
+            return response.status_code
+        except Exception as e:
+            print(f"Error checking URL {url}: {e}")
+            return None

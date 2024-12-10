@@ -4,7 +4,9 @@ from src.cores.page_factory import PageFactory
 
 # Define URL list directly in the test suite
 URLS_TO_TEST = [
-    "https://zingnews.vn/"
+    "https://samsung.com/sg/offer",
+    "https://samsung.com/sg",
+    "https://samsung.com/vn"
 ]
 domain = "ss"
 page_type = "normal_pdp"
@@ -30,20 +32,20 @@ def test_access_correct_url(browser_factory_fixture, device_type):
     page_object = PageFactory.create_page(domain, page_type, page, device=device_type)
 
     # Perform navigation and actions
-    validate_url_tab_results = page_object.open_tabs_and_perform_actions(
-        context,
+    page_object.open_tabs_and_perform_actions(
+        context=context,
         urls=URLS_TO_TEST,
         max_tabs=max_tabs,
-        collect_url_by_tab=validate_urls,
-        action_flags=None
+        action_flags={"collect_url_by_tab": validate_urls}
     )
 
     # Validate navigated URLs if validation is enabled
     if validate_urls:
-        for tab_index, expected_url, actual_url in validate_url_tab_results:
+        collected_url_results = getattr(page_object, "collected_url_results", [])
+        for tab_index, input_url, actual_url in collected_url_results:
             pytest.assume(
-                actual_url == expected_url,
-                f"Tab {tab_index}: Expected URL {expected_url}, but got {actual_url}"
+                actual_url == input_url,
+                f"Tab {tab_index}: Expected URL {input_url}, but got {actual_url}"
             )
 
 # Run tests in parallel with console logging when the script is executed directly

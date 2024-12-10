@@ -34,62 +34,64 @@ class ImagePropertiesExtractor:
         :return: A list of dictionaries containing image attributes and properties.
         """
         page = page or self.page
-
-        if parent_locator:
-            js_code = f"""
-                () => {{
-                    const parentElement = document.querySelector("{parent_locator}");
-                    if (!parentElement) return [];
-
-                    return Array.from(parentElement.querySelectorAll('img')).map(img => {{
-                        const attributes = Object.fromEntries(
-                            Array.from(img.attributes).map(attr => [attr.name, attr.value])
-                        );
-
-                        const resolvedSrcs = Object.fromEntries(
-                            Object.entries(attributes)
-                                .filter(([key]) => key.includes('src'))
-                                .map(([key, value]) => [key, new URL(value, document.baseURI).href])
-                        );
-
-                        return {{
-                            url: document.location.href,
-                            resolvedSrcs,
-                            attributes,
-                            intrinsicWidth: img.naturalWidth,
-                            intrinsicHeight: img.naturalHeight,
-                            renderedWidth: img.clientWidth,
-                            renderedHeight: img.clientHeight
-                        }};
-                    }});
-                }}
-            """
-        else:
-            js_code = """
-                () => {
-                    return Array.from(document.querySelectorAll('img')).map(img => {
-                        const attributes = Object.fromEntries(
-                            Array.from(img.attributes).map(attr => [attr.name, attr.value])
-                        );
-
-                        const resolvedSrcs = Object.fromEntries(
-                            Object.entries(attributes)
-                                .filter(([key]) => key.includes('src'))
-                                .map(([key, value]) => [key, new URL(value, document.baseURI).href])
-                        );
-
-                        return {
-                            url: document.location.href,
-                            resolvedSrcs,
-                            attributes,
-                            intrinsicWidth: img.naturalWidth,
-                            intrinsicHeight: img.naturalHeight,
-                            renderedWidth: img.clientWidth,
-                            renderedHeight: img.clientHeight
-                        };
-                    });
-                }
-            """
+        try:
+            if parent_locator:
+                js_code = f"""
+                    () => {{
+                        const parentElement = document.querySelector("{parent_locator}");
+                        if (!parentElement) return [];
+    
+                        return Array.from(parentElement.querySelectorAll('img')).map(img => {{
+                            const attributes = Object.fromEntries(
+                                Array.from(img.attributes).map(attr => [attr.name, attr.value])
+                            );
+    
+                            const resolvedSrcs = Object.fromEntries(
+                                Object.entries(attributes)
+                                    .filter(([key]) => key.includes('src'))
+                                    .map(([key, value]) => [key, new URL(value, document.baseURI).href])
+                            );
+    
+                            return {{
+                                url: document.location.href,
+                                resolvedSrcs,
+                                attributes,
+                                intrinsicWidth: img.naturalWidth,
+                                intrinsicHeight: img.naturalHeight,
+                                renderedWidth: img.clientWidth,
+                                renderedHeight: img.clientHeight
+                            }};
+                        }});
+                    }}
+                """
+            else:
+                js_code = """
+                    () => {
+                        return Array.from(document.querySelectorAll('img')).map(img => {
+                            const attributes = Object.fromEntries(
+                                Array.from(img.attributes).map(attr => [attr.name, attr.value])
+                            );
+    
+                            const resolvedSrcs = Object.fromEntries(
+                                Object.entries(attributes)
+                                    .filter(([key]) => key.includes('src'))
+                                    .map(([key, value]) => [key, new URL(value, document.baseURI).href])
+                            );
+    
+                            return {
+                                url: document.location.href,
+                                resolvedSrcs,
+                                attributes,
+                                intrinsicWidth: img.naturalWidth,
+                                intrinsicHeight: img.naturalHeight,
+                                renderedWidth: img.clientWidth,
+                                renderedHeight: img.clientHeight
+                            };
+                        });
+                    }
+                """
+        except Exception as e:
+            return e
 
         return page.evaluate(js_code)
 
