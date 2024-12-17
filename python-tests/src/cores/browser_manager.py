@@ -1,7 +1,9 @@
 # python-tests/src/cores/browser_manager.py
-
-from playwright.sync_api import Playwright, BrowserContext
+import logging
 import os
+from playwright.sync_api import Playwright, BrowserContext
+from src.pages.s_login_env_index_page import S_Login_Env_Index_Page
+from src.utils.actions_utils import ActionUtils
 
 class BrowserManager:
     unwanted_tabs = ["chrome-extension://", "https://chrispederick.com/"]
@@ -34,7 +36,8 @@ class BrowserManager:
             print(f"Closing unwanted tab with URL: {page.url}")
             page.close()
 
-    def _find_extension_paths(self, directory: str) -> list:
+    @staticmethod
+    def _find_extension_paths(directory: str) -> list:
         """Locate paths for Chrome extensions inside the given directory."""
         extension_paths = []
         for root, dirs, files in os.walk(directory):
@@ -97,3 +100,63 @@ class BrowserManager:
                 has_touch=has_touch,
                 user_agent=user_agent,
             )
+
+    @staticmethod
+    def analyze_url_and_apply_cookie(context, url):
+        """
+        Analyze the URL and apply cookies dynamically.
+        :param context: Playwright BrowserContext.
+        :param url: The URL to analyze and apply cookies for.
+        """
+        try:
+            from src.cores.auth_manager import AuthManager
+            from src.cores.cookie_manager import configure_cookies_lib, set_cookies_in_context
+
+            auth_manager = AuthManager(ActionUtils.load_config_from_json())
+            url_info = auth_manager.analyze_url(url)
+            base_domain = url.split("/")[2]
+
+            cookies = configure_cookies_lib(auth_manager, url_info, base_domain)
+            set_cookies_in_context(context, cookies)
+            logging.info(f"Cookies applied successfully for URL: {url}")
+
+        except ImportError as e:
+            logging.error(f"Failed to import required modules for URL '{url}': {e}")
+            raise  # Re-raise the exception to signal failure
+
+        except Exception as e:
+            logging.error(f"Error analyzing URL '{url}' or applying cookies: {e}")
+            raise  # Re-raise the exception to signal failure
+
+    @staticmethod
+    def preprocess_urls(context, urls, login_env: str):
+        """
+        Preprocess a list of URLs:
+        - Handle 'p6-qa' login flow and cookie application.
+        - If any error occurs during URL preprocessing, stop the entire process.
+        :param context: Browser context.
+        :param urls: List of URLs to preprocess.
+        :param login_env: Login environment string.
+        :return: logged_in_context if successful, None if there was an error.
+        """
+        logged_in_context = None  # Track logged-in context across multiple URLs
+
+        try:
+            for url in urls:
+                if "p6-qa" in url and logged_in_context is None:
+                    logging.info(f"Processing 'p6-qa' URL: {url}")
+                    BrowserManager.analyze_url_and_apply_cookie(context, url)
+
+                    # Perform the login flow for the first 'p6-qa' URL
+                    login_page = S_Login_Env_Index_Page(context.pages[0] if context.pages else context.new_page())
+                    logged_in_context = login_page.handle_login_to_env_success_page(login_env)
+
+                elif "p6-qa" not in url:
+                    BrowserManager.analyze_url_and_apply_cookie(context, url)
+
+            return logged_in_context
+
+        except Exception as e:
+            # Log the error and indicate that preprocessing has failed
+            logging.info(f"Error during preprocessing URLs: {e}")
+            return None  # Indicate failure

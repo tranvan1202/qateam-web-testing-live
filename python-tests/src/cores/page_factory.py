@@ -13,8 +13,7 @@ class PageFactory:
         },
         "ss": {
             "normal_pdp": SSPDPage
-        },
-        # Add mappings for other domains and page types
+        }
     }
 
     @staticmethod

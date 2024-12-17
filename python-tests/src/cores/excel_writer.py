@@ -5,7 +5,6 @@ import os
 import socket
 import platform
 
-
 class ExcelWriter:
     def __init__(self, base_path=None):
         # Determine the domain root and set the reports path

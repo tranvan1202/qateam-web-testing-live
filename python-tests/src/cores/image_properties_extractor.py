@@ -1,19 +1,49 @@
 import os
-
 import requests
 import time
-
 
 class ImagePropertiesExtractor:
     def __init__(self, page):
         self.page = page
 
-    def extract_image_data(self, parent_locator=None, page=None):
+    def export_image_properties_to_excel(self, extract_img_area, device, excel_writer):
+        """
+        Extract image properties from a specified area and save them to an Excel file.
+        :param extract_img_area: The selector for the area to extract images from.
+        :param device: The device type (e.g., "pc", "mo").
+        :param excel_writer: The Excel writer instance to save the data.
+        :return: The absolute path to the saved Excel file or None if no data was extracted.
+        """
+        # Step 1: Extract image data
+        print(f"Extracting image properties for page (URL: {self.page.url})")
+        img_data = self.extract_valid_images(extract_img_area)
+
+        if not img_data or len(img_data) <= 1:
+            print(f"No valid image data found for page (URL: {self.page.url}).")
+            return None
+
+        try:
+            # Step 2: Save data to Excel
+            filename = excel_writer.write_data_to_excel(
+                img_data,
+                executed_file_name=f"image_data_{int(time.time())}",
+                device_type=device
+            )
+
+            # Resolve the absolute path
+            absolute_filename = os.path.abspath(filename)
+            print(f"Image data exported to {absolute_filename} for page (URL: {self.page.url}).")
+            return absolute_filename
+
+        except Exception as e:
+            print(f"Error exporting image data for page (URL: {self.page.url}): {e}")
+            return None
+
+    def extract_valid_images(self, parent_locator=None):
         """Extract and compile data for all <img> elements."""
         # Step 1: Extract raw image data from the DOM
-        page = page or self.page
-
-        img_elements_data = self.extract_image_elements_from_dom(parent_locator, page)
+        #page = page or self.page
+        img_elements_data = self.extract_raw_image_elements_from_dom(parent_locator)
 
         # Step 2: Filter valid images
         valid_images = self.filter_valid_images(img_elements_data)
@@ -27,13 +57,7 @@ class ImagePropertiesExtractor:
         # Step 5: Compile image data into the final structure
         return self.compile_image_data(valid_images, src_status_map)
 
-    def extract_image_elements_from_dom(self, parent_locator=None, page=None):
-        """
-        Extract raw image data from a specific parent element in the DOM, or the entire DOM if no parent_locator is provided.
-        :param parent_locator: The CSS selector of the parent element to search within (default: None, which searches the entire DOM).
-        :return: A list of dictionaries containing image attributes and properties.
-        """
-        page = page or self.page
+    def extract_raw_image_elements_from_dom(self, parent_locator=None):
         try:
             if parent_locator:
                 js_code = f"""
@@ -93,20 +117,23 @@ class ImagePropertiesExtractor:
         except Exception as e:
             return e
 
-        return page.evaluate(js_code)
+        return self.page.evaluate(js_code)
 
-    def filter_valid_images(self, img_elements_data):
+    @staticmethod
+    def filter_valid_images(img_elements_data):
         """Filter images with valid intrinsic dimensions."""
         return [
             img_info for img_info in img_elements_data
             if img_info['intrinsicWidth'] > 0 or img_info['intrinsicHeight'] > 0
         ]
 
-    def resolve_src_urls(self, valid_images):
+    @staticmethod
+    def resolve_src_urls(valid_images):
         """Collect all src URLs from valid images."""
         return {src_url for img_info in valid_images for src_url in img_info['resolvedSrcs'].values()}
 
-    def compile_image_data(self, valid_images, src_status_map):
+    @staticmethod
+    def compile_image_data(valid_images, src_status_map):
         """Compile the final image data into a structured format."""
         img_data = [
             ["URL", "Image Src", "Connection Status", "Intrinsic Size", "Rendered Size", "File Size", "Alt Text"]]
@@ -185,37 +212,3 @@ class ImagePropertiesExtractor:
                 src_status_map[src_url] = ("N/A", "N/A")
 
         return src_status_map
-
-    def extract_image_properties_to_excel(self, page, extract_img_area, device, excel_writer):
-        """
-        Extract image properties from a specified area and save them to an Excel file.
-        :param page: The Playwright page object to extract images from.
-        :param extract_img_area: The selector for the area to extract images from.
-        :param device: The device type (e.g., "pc", "mo").
-        :param excel_writer: The Excel writer instance to save the data.
-        :return: The absolute path to the saved Excel file or None if no data was extracted.
-        """
-        # Step 1: Extract image data
-        print(f"Extracting image properties for page (URL: {page.url})")
-        img_data = self.extract_image_data(extract_img_area, page=page)
-
-        if not img_data or len(img_data) <= 1:
-            print(f"No valid image data found for page (URL: {page.url}).")
-            return None
-
-        try:
-            # Step 2: Save data to Excel
-            filename = excel_writer.write_data_to_excel(
-                img_data,
-                executed_file_name=f"image_data_{int(time.time())}",
-                device_type=device
-            )
-
-            # Resolve the absolute path
-            absolute_filename = os.path.abspath(filename)
-            print(f"Image data exported to {absolute_filename} for page (URL: {page.url}).")
-            return absolute_filename
-
-        except Exception as e:
-            print(f"Error exporting image data for page (URL: {page.url}): {e}")
-            return None

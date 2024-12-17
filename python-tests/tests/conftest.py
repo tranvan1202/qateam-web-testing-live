@@ -1,10 +1,10 @@
 # python-tests/tests/conftest.py
-
+import logging
+import os
 import pytest
 from fixtures.browser import browser_factory
 from src.cores.json_reader import JsonReader
 from playwright.sync_api import sync_playwright
-import os
 
 @pytest.fixture(scope="session")
 def config():
