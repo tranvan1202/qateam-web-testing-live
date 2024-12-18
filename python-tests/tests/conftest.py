@@ -1,5 +1,4 @@
 # python-tests/tests/conftest.py
-import logging
 import os
 import pytest
 from fixtures.browser import browser_factory

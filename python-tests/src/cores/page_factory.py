@@ -17,7 +17,7 @@ class PageFactory:
     }
 
     @staticmethod
-    def create_page(domain: str, page_type: str, page, device: str):
+    def create_page(domain: str, page_type: str, page):
         # Check if the domain exists in the mapping
         if domain not in PageFactory.PAGE_MAPPING:
             raise ValueError(f"Unsupported domain: {domain}")
@@ -30,4 +30,4 @@ class PageFactory:
         page_class = PageFactory.PAGE_MAPPING[domain][page_type]
 
         # Return an instance of the Page Object class
-        return page_class(page, device)
+        return page_class(page)

@@ -1,17 +1,14 @@
 # python-tests/src/pages/base_page.py
 import logging
 from abc import ABC, abstractmethod
-from playwright.sync_api import Page
 from src.utils.actions_utils import ActionUtils
 from src.cores.cache_manager import CacheManager
 from src.cores.image_properties_extractor import ImagePropertiesExtractor
 from src.cores.excel_writer import ExcelWriter
-from src.utils.url_utils import URLUtils
 
 class BasePage(ABC):
-    def __init__(self, page: Page, device: str):
+    def __init__(self, page):
         self.page = page
-        self.device = device
         self._excel_writer = None
         self._image_extractor = None
         self._cache_manager = None
@@ -61,13 +58,11 @@ class BasePage(ABC):
         ActionUtils.scroll_to_bottom(self.page)
         self.customize_lazy_load_trigger_actions()
         ActionUtils.scroll_to_top(self.page)
-        ActionUtils.inject_button_script(self.page, ActionUtils.get_wait_time(self.device))
-        ActionUtils.wait_for_button_trigger_or_timeout(self.page, self.device)
 
-    def extract_img_properties_to_exel(self, extract_img_locator:str):
+    def extract_img_properties_to_exel(self, extract_img_locator:str, test_device):
         img_properties_to_excel_result = self.image_extractor.export_image_properties_to_excel(
             extract_img_area=extract_img_locator,
-            device=self.device,
+            device=test_device,
             excel_writer=self.excel_writer
         )
         return img_properties_to_excel_result
@@ -83,22 +78,3 @@ class BasePage(ABC):
 
     def get_dom_js_links(self):
         return self.page.evaluate("() => Array.from(document.querySelectorAll('script')).map(script => script.src)")
-
-    def validate_urls_with_caches(self):
-        url_util = URLUtils()
-        grabbed_raw_urls = self.get_dom_links()
-        processed_urls = url_util.filter_grabbed_raw_urls(self.page, grabbed_raw_urls)
-
-        total_urls = len(processed_urls)
-        print(f"Total grabbed URLs: {total_urls}\n")
-        # Tiến hành kiểm tra từng url
-        for idx, url in enumerate(processed_urls):
-            # Kiểm tra trạng thái HTTP qua cache
-            response_result = url_util.check_url_status_with_cache(url, "links", timeout=10)
-            # Xử lý kết quả
-            if response_result is None:
-                print(f"[{idx + 1}/{total_urls}]: [FAIL] Unable to check Link: {url}")
-            elif response_result == 404:
-                print(f"[{idx + 1}/{total_urls}]: [FAIL] Broken: {url} (HTTP {response_result})")
-            else:
-                print(f"[{idx + 1}/{total_urls}]: [PASS] {url} (HTTP {response_result})")

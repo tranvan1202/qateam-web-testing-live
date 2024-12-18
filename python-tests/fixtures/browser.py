@@ -2,7 +2,7 @@
 
 import os
 from src.cores.browser_manager import BrowserManager
-from playwright.sync_api import Playwright, sync_playwright
+from playwright.sync_api import Playwright
 
 def browser_factory(
     playwright: Playwright,
