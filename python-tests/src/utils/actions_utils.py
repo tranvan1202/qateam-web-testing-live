@@ -3,6 +3,7 @@ import time
 import json
 import os
 import logging
+import time
 from urllib.parse import urlparse
 
 class ActionUtils:
@@ -119,9 +120,8 @@ class ActionUtils:
         retries = 0
         while True:
             try:
-                element.click(force=force_click)
+                element.click(force=force_click,timeout=2000)
                 logging.info("Element clicked successfully.")
-                time.sleep(0.5)
 
                 # Exit loop if not repeating or element is disabled
                 if not repeat_until_disabled or element.is_disabled():
@@ -144,9 +144,10 @@ class ActionUtils:
         """
         options = options or {}
         timeout = options.get("timeout", 2000)
-        force_click = options.get("force_click", True)
+        force_click = options.get("force_click", False)
         click_all_founded_elements = options.get("click_all_founded_elements", False)
         click_until_disabled = options.get("click_until_disabled", False)
+        click_on_page_element_only = options.get("click_on_page_element_only", True)
         max_retries = options.get("max_retries", 10)
 
         try:
@@ -159,7 +160,7 @@ class ActionUtils:
 
             for element in elements:
                 # Skip navigational elements
-                if ActionUtils.skip_navigation_links(element):
+                if ActionUtils.skip_navigation_links(element) and click_on_page_element_only:
                     continue
 
                 # Click the element
@@ -171,6 +172,35 @@ class ActionUtils:
         except Exception as e:
             logging.error(f"Error waiting for elements with locator '{locator}': {e}")
             return False
+
+    @staticmethod
+    def wait_for_element_stability(locator, timeout=5000, poll_interval=200):
+        """
+        Chờ trạng thái element ổn định (không thay đổi kích thước hoặc vị trí).
+        """
+        start_time = time.time()
+        last_bounding_box = None
+
+        while True:
+            current_bounding_box = locator.bounding_box()
+            if current_bounding_box == last_bounding_box:
+                return True
+            last_bounding_box = current_bounding_box
+
+            elapsed_time = (time.time() - start_time) * 1000
+            if elapsed_time > timeout:
+                raise TimeoutError("Element stability not achieved within timeout.")
+
+            time.sleep(poll_interval / 1000)
+
+    @staticmethod
+    def safe_click(locator, timeout=5000):
+        try:
+            ActionUtils.wait_for_element_stability(locator, timeout=timeout)
+            locator.wait_for(state="visible", timeout=timeout)
+            locator.click()
+        except Exception as e:
+            raise RuntimeError(f"Failed to click element: {e}")
 
     @staticmethod
     def scroll_pages_with_synchronization(pages, config):

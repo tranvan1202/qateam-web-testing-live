@@ -1,5 +1,4 @@
 # python-tests/tests/suites/test_standard_smoke_check_suite.py
-import logging
 import pytest
 from src.cores.browser_manager import BrowserManager
 from src.cores.page_factory import PageFactory
@@ -7,22 +6,25 @@ from src.utils.actions_utils import ActionUtils
 from src.utils.url_utils import URLUtils
 
 URLS_AND_PAGE_TYPES = [
-    "https://zingnews.vn/,normal_pdp"
+    "https://p6-qa.samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp",
+    "https://loremipsum.io/,normal_pdp",
+    "https://p6-qa.samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp"
 ]
 TEST_SUITE_CONFIGS = {
     "domain": "ss",
     "s_test_env": "qa",
-    "multiple_tabs": True,
+    "multiple_tabs": False,
     "auto_trigger_lazy_load": True,
-    "test_broken_links": True,
+    "test_broken_links": False,
     "test_broken_images": False,
     "test_broken_videos": False,
-    "test_broken_js": False
+    "test_broken_js_scripts": True,
+    "test_broken_css_scripts": False
 }
 urls_and_page_types_tuples = URLUtils.convert_string_list_url_to_tuple_type(URLS_AND_PAGE_TYPES)
 
 @pytest.mark.parametrize(
-    "device_type", ["mo"], ids=["device_mo"]
+    "device_type", ["mo"], ids=["device_MO_to_PC"]
 )
 def test_standard_smoke(browser_factory_fixture, device_type):
     print("Creating browser context...")
@@ -65,7 +67,7 @@ def test_standard_smoke(browser_factory_fixture, device_type):
             ActionUtils.inject_button_script(page_object.page, ActionUtils.get_wait_time(device_type))
             ActionUtils.wait_for_button_trigger_or_timeout(page_object.page, device_type)
 
-            execute_test_suite_processes(page_object, tab_number)
+            execute_test_suite_processes(page_object, tab_number, context)
     else:
         # Step 2.2: Process each page (single tab)
         page = context.pages[0] if context.pages else context.new_page()
@@ -83,67 +85,97 @@ def test_standard_smoke(browser_factory_fixture, device_type):
             ActionUtils.inject_button_script(page_object.page, ActionUtils.get_wait_time(device_type))
             ActionUtils.wait_for_button_trigger_or_timeout(page_object.page, device_type)
 
-            execute_test_suite_processes(page_object, None)
+            execute_test_suite_processes(page_object, None, context)
 
-def execute_test_suite_processes(page_object, tab_number=None):
+def execute_test_suite_processes(page_object, tab_number=None, context=None):
     page_current_url = page_object.page.url
     try:
         # Log and process page-specific actions
-        logging.info(f"Processing actions for Tab {tab_number if tab_number else 'Single'} {page_current_url}")
         print(f"Processing actions for Tab {tab_number if tab_number else 'Single'} {page_current_url}")
         if TEST_SUITE_CONFIGS["test_broken_links"]:
+            print(f"-------------------------------START CHECKING BROKEN LINKS-------------------------------------------------")
             page_grabbed_links = page_object.get_dom_links()
-            logging.info(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, collecting links...")
-            print(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, collecting links...")
-            processed_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_links)
-            logging.info(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking links...")
+            processed_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_links, True)
             print(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking links...")
 
-            broken_links_result = check_if_broken_urls_with_cache(processed_urls, "links")
+            broken_links_result = check_if_broken_urls_with_cache(processed_urls, "links", context)
             pytest.assume(
                 len(broken_links_result) == 0,
                 f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Broken links: {broken_links_result}"
             )
+            print(f"-------------------------------END CHECKING BROKEN LINKS-------------------------------------------------")
 
         if TEST_SUITE_CONFIGS["test_broken_images"]:
-            logging.info(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken images...")
-            print(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken images...")
+            print(f"-------------------------------START CHECKING BROKEN IMAGES-------------------------------------------------")
+            page_grabbed_img_links = page_object.get_dom_image_links()
+            processed_img_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_img_links)
+            print(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken Images....")
+            broken_img_links_result = check_if_broken_urls_with_cache(processed_img_urls, "images")
+            pytest.assume(
+                len(broken_img_links_result) == 0,
+                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Broken Images: {broken_img_links_result}"
+            )
+            print(f"-------------------------------END CHECKING BROKEN IMAGES-------------------------------------------------")
 
         if TEST_SUITE_CONFIGS["test_broken_videos"]:
-            logging.info(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken videos...")
             print(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken videos...")
+                f"-------------------------------START CHECKING BROKEN VIDEOS-------------------------------------------------")
+            page_grabbed_video_links = page_object.get_dom_video_links()
+            processed_video_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_video_links)
+            print(
+                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken Videos....")
+            broken_video_links_result = check_if_broken_urls_with_cache(processed_video_urls, "videos")
+            pytest.assume(
+                len(broken_video_links_result) == 0,
+                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Broken Videos: {broken_video_links_result}"
+            )
+            print(
+                f"-------------------------------END CHECKING BROKEN VIDEOS-------------------------------------------------")
 
-        if TEST_SUITE_CONFIGS["test_broken_js"]:
-            logging.info(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken JS files...")
-            print(
-                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken JS files....")
+        if TEST_SUITE_CONFIGS["test_broken_js_scripts"]:
+            print(f"-------------------------------START CHECKING BROKEN JS LINKS-------------------------------------------------")
+            page_grabbed_js_links = page_object.get_dom_js_links()
+            processed_js_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_js_links)
+            print(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken JS script files....")
+            broken_js_links_result = check_if_broken_urls_with_cache(processed_js_urls, "js")
+            pytest.assume(
+                len(broken_js_links_result) == 0,
+                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Broken js files: {broken_js_links_result}"
+            )
+            print(f"-------------------------------END CHECKING BROKEN JS LINKS-------------------------------------------------")
+
+        if TEST_SUITE_CONFIGS["test_broken_css_scripts"]:
+            print(f"-------------------------------START CHECKING BROKEN CSS LINKS-------------------------------------------------")
+            page_grabbed_css_links = page_object.get_dom_css_links()
+            processed_css_urls = URLUtils.filter_grabbed_raw_urls(page_object.page, page_grabbed_css_links)
+            print(f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Smoke test, checking broken CSS script files....")
+            broken_css_links_result = check_if_broken_urls_with_cache(processed_css_urls, "css")
+            pytest.assume(
+                len(broken_css_links_result) == 0,
+                f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: Broken css files: {broken_css_links_result}"
+            )
+            print(f"-------------------------------END CHECKING BROKEN CSS LINKS-------------------------------------------------")
 
     except Exception as e:
         print(f"Error processing Tab {tab_number if tab_number else 'Single'}: {e}")
-        logging.error(f"Error processing Tab {tab_number if tab_number else 'Single'}: {e}")
         pytest.assume(False, f"Tab {tab_number if tab_number else 'Single'} => {page_current_url}: An error occurred: {e}")
 
-def check_if_broken_urls_with_cache(processed_urls, url_type):
+def check_if_broken_urls_with_cache(processed_urls, url_type, context=None):
     url_response_results = []
     total_urls = len(processed_urls)
     print(f"Total grabbed URLs: {total_urls}\n")
     # Tiến hành kiểm tra từng url
     for idx, url in enumerate(processed_urls):
         # Kiểm tra trạng thái HTTP qua cache
-        url_response_status = URLUtils.check_url_status_with_cache(url, url_type, timeout=10)
+        url_response_status = URLUtils.check_url_status_with_cache(url, url_type, timeout=10, context=context)
         # Xử lý kết quả
         if url_response_status is None:
             url_response_status = "Unable to check"
             print(f"[{idx + 1}/{total_urls}]: [FAIL] Unable to check Link: {url}")
-            url_response_results.append((f"[FAIL] {url}", url_response_status))
+            url_response_results.append((f"{url}", url_response_status))
         elif url_response_status == 404:
             print(f"[{idx + 1}/{total_urls}]: [FAIL] Broken: {url} (HTTP {url_response_status})")
-            url_response_results.append((f"[FAIL] {url}", url_response_status))
+            url_response_results.append((f"{url}", url_response_status))
         else:
             print(f"[{idx + 1}/{total_urls}]: [PASS] {url} (HTTP {url_response_status})")
 

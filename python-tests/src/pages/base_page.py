@@ -15,6 +15,7 @@ class BasePage(ABC):
         self._options_click_all_founded_elements = {"click_all_founded_elements": True}
         self._options_click_until_disabled = {"click_until_disabled": True}
         self._options_click_all_elements_until_disabled = {"click_all_founded_elements": True, "click_until_disabled": True}
+        self._options_not_force_click = {"force_click": False}
 
     @property
     def excel_writer(self):
@@ -71,10 +72,25 @@ class BasePage(ABC):
         return self.page.evaluate("() => Array.from(document.querySelectorAll('a')).map(a => a.href)")
 
     def get_dom_image_links(self):
-        return self.page.evaluate("() => Array.from(document.querySelectorAll('img')).map(img => img.src)")
+        return self.page.evaluate("""
+            () => Array.from(document.querySelectorAll('img'))
+                      .flatMap(img => 
+                          Array.from(img.attributes)
+                               .filter(attr => attr.name.includes('src'))
+                               .map(attr => attr.value)
+                      )
+                      .filter(src => src)  // Remove empty or null values
+        """)
 
     def get_dom_video_links(self):
         return self.page.evaluate("() => Array.from(document.querySelectorAll('video')).map(video => video.src)")
 
     def get_dom_js_links(self):
         return self.page.evaluate("() => Array.from(document.querySelectorAll('script')).map(script => script.src)")
+
+    def get_dom_css_links(self):
+        return self.page.evaluate("""
+            () => Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+                      .map(link => link.href)
+                      .filter(href => href)
+        """)

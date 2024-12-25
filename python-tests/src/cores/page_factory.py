@@ -1,6 +1,8 @@
 from src.pages.i_hybris_promotion_rules_page import IHybrisPromotionRulesPage
 from src.pages.i_pdpage import IQPDPage
 from src.pages.s_normal_pdpage import SSPDPage
+from src.pages.s_trade_in_page import SSTradeInPage
+
 
 class PageFactory:
     """
@@ -12,7 +14,8 @@ class PageFactory:
             "hybris": IHybrisPromotionRulesPage
         },
         "ss": {
-            "normal_pdp": SSPDPage
+            "normal_pdp": SSPDPage,
+            "trade_in": SSTradeInPage
         }
     }
 
