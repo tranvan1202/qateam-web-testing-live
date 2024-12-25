@@ -6,9 +6,9 @@ from src.utils.actions_utils import ActionUtils
 from src.utils.url_utils import URLUtils
 
 URLS_AND_PAGE_TYPES = [
-    "https://p6-qa.samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp",
+    "https://samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp",
     "https://loremipsum.io/,normal_pdp",
-    "https://p6-qa.samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp"
+    "https://samsung.com/ph/offer/online/2024/galaxy-grand-holiday-sale/,normal_pdp"
 ]
 TEST_SUITE_CONFIGS = {
     "domain": "ss",
