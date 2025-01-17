@@ -7,7 +7,7 @@ from src.utils.actions_utils import ActionUtils
 from src.utils.url_utils import URLUtils
 
 URLS_AND_PAGE_TYPES = [
-    "https://zingnews.vn/normal_pdp"
+    "https://zingnews.vn/,normal_pdp"
 ]
 
 TEST_SUITE_CONFIGS = {

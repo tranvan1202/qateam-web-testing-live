@@ -2,6 +2,7 @@
 import os
 import pytest
 from fixtures.browser import browser_factory
+from src.cores.cache_manager import CacheManager
 from src.cores.json_reader import JsonReader
 from playwright.sync_api import sync_playwright
 
@@ -18,7 +19,7 @@ def playwright_instance():
     with sync_playwright() as playwright:
         yield playwright
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def browser_factory_fixture(playwright_instance, config):
     context = None  # Initialize context
 
@@ -44,3 +45,8 @@ def browser_factory_fixture(playwright_instance, config):
             print("No browser context to close.")
     except Exception as e:
         print(f"Error during browser context teardown: {e}")
+
+# @pytest.fixture(scope="session", autouse=True)
+# def scheduled_clean_up():
+#     yield
+#     CacheManager().scheduled_cache_clean_up()  # Clean-up at the end of the session

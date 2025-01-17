@@ -42,12 +42,13 @@ class BasePage(ABC):
     def customize_lazy_load_trigger_actions(self):
         pass
 
-    def navigate_to_page(self, url):
+    def navigate_to_page(self, url, wait_for_dom_loaded=True):
         try:
             logging.info(f"Navigating to URL: {url}")
             print(f"Navigating to URL: {url}")
             self.page.goto(url)
-            self.page.wait_for_load_state("domcontentloaded")
+            if wait_for_dom_loaded:
+                self.page.wait_for_load_state("domcontentloaded")
             logging.info(f"Finished navigating to {url}")
             print(f"Finished navigating to {url}")
         except Exception as e:

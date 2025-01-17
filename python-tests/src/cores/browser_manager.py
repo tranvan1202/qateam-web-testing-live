@@ -129,7 +129,7 @@ class BrowserManager:
             raise  # Re-raise the exception to signal failure
 
     @staticmethod
-    def preprocess_urls(context, urls, login_env: str):
+    def preprocess_urls(context, urls, login_env=""):
         """
         Preprocess a list of URLs:
         - Handle 'p6-qa' login flow and cookie application.

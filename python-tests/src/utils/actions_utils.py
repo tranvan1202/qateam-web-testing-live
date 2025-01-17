@@ -27,6 +27,8 @@ class ActionUtils:
     @staticmethod
     def inject_button_script(page, wait_time: int):
         logging.info("Injecting button script with countdown timer")
+        reset_script = "window.nextStepTriggered = false;"
+        page.evaluate(reset_script)  # Reset biến trước khi inject script
         button_script = f"""
         (function() {{
           var button = document.createElement('button');

@@ -28,6 +28,20 @@ class URLUtils:
             return absolute_unique_valid_urls
 
     @staticmethod
+    def filter_inputted_urls(inputted_urls, is_convert_to_www=False):
+        # Step 1: Remove invalid URLs
+        valid_urls = URLUtils.remove_invalid_urls(inputted_urls)
+
+        # Step 2: Remove duplicates
+        unique_valid_urls = URLUtils.remove_duplicated_urls(valid_urls)
+
+        if is_convert_to_www:
+            absolute_unique_valid_urls_converted_to_www = URLUtils.convert_p6_qa_to_www(unique_valid_urls)
+            return absolute_unique_valid_urls_converted_to_www
+        else:
+            return unique_valid_urls
+
+    @staticmethod
     def remove_invalid_urls(urls):
         if not isinstance(urls, list):
             raise ValueError("URLs should be provided as a list.")
@@ -81,10 +95,14 @@ class URLUtils:
         try:
             # Kiểm tra trạng thái HTTP qua session cache
             response = session.get(url, allow_redirects=True, timeout=timeout)
-            return response.status_code
+
+            # Xác định nguồn dữ liệu (cache hoặc real-time)
+            source = "Cache" if response.from_cache else "Real Time"
+            return f"{response.status_code} - {source}"
+
         except Exception as e:
             print(f"[ERROR] Unable to check URL {url}: {e}")
-            return None
+            return "Unable to check - Real Time"
 
     @staticmethod
     def convert_string_list_url_to_tuple_type(string_list):
@@ -104,4 +122,3 @@ class URLUtils:
                 # Giữ nguyên URL nếu không chứa "p6-qa"
                 converted_urls.append(url)
         return converted_urls
-
